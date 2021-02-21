@@ -6,6 +6,7 @@
       <script type = "text/javascript">
          let data = "test;";//"LOGIN;test;test"
          let socket = null;
+         let queue = []
          function connectWS() {
             socket = new WebSocket("ws://127.0.0.1:10000");
             // Connection opened
@@ -15,11 +16,11 @@
             });
 
             // Listen for messages
-            socket.addEventListener('message', function (event) {
-                console.log('Message from server ', event.data);
-                document.getElementById("output").innerHTML+="<b>"+document.getElementById("command").value+":<b></b>\n</br>";
-                document.getElementById("output").innerHTML+=event.data+"\n</br>";
+            socket.addEventListener('message', function(event) {
+               receiveMessage(event.data)
             });
+
+
          }
 
          const waitConnection = (socket) => {
@@ -30,7 +31,6 @@
                let currentAttempt = 0
 
                const interval = setInterval(() => {
-
                   if( currentAttempt > numberOfAttempts -1) {
                      clearInterval(interval)
                      reject(new Error('Maximum number of attempts'))
@@ -49,13 +49,25 @@
             if(socket.readystate !== socket.OPEN) {
                try {
                   await waitConnection(socket)
-                  if(!msg)socket.send(document.getElementById("command").value);
-                  else socket.send(msg)
+                  socket.send(msg)
+                  //NOT SURE IF WORKS!
+                  const result = await new Promise((resolve) =>  {
+                     socket.on("message", (data) => {
+                        queue.push(data)
+                        resolve();
+                     });
+                  }):
                } catch (err) { console.error(err) }
             } else {
-               if(!msg)socket.send(document.getElementById("command").value);
-               else socket.send(msg);
+               socket.send(msg)
             }
+         }
+
+         const receiveMessage = (data) => {
+            console.log('Message from server ', data);
+            document.getElementById("output").innerHTML+="<b>"+document.getElementById("command").value+":<b></b>\n</br>";
+            document.getElementById("output").innerHTML+=event.data+"\n</br>";
+            return data
          }
 
          window.onload = () => {
@@ -159,7 +171,7 @@
          <div id="control">
          <input type="text" id="command" value="LOGIN;test;test">
          <input type="button" id="connect" value="connect" onClick="connectWS()">
-         <input type="button" id="send" value="send" onClick="sendWS()">
+         <input type="button" id="send" value="send" onClick="sendMessage(socket,document.getElementById('command').value)">
          
          </div>
       </div>
