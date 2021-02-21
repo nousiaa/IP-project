@@ -23,14 +23,22 @@
 
          }
 
-         function sendWS(){
-            socket.send(document.getElementById("command").value);
+         function sendWS(data){
+
+            if(!data)socket.send(document.getElementById("command").value);
+            else socket.send(data);
          }
 
          window.onload = () => {
             let canvas = document.getElementById("canvas");
             let context = canvas.getContext("2d");
             let boundings = canvas.getBoundingClientRect();
+            let xyMatrix = [];
+            let mouseXmin = 0;
+            let mouseYmin = 0;
+
+            let mouseXmax = 0;
+            let mouseYmax = 0;
 
             let mouseX = 0;
             let mouseY = 0;
@@ -42,7 +50,11 @@
             canvas.addEventListener('mousedown', function(event) {
                setMouseCoordinates(event);
                isDrawing = true;
-
+               xyMatrix = [];
+               mouseXmin = mouseX;
+               mouseXmax = mouseX;
+               mouseYmin = mouseY;
+               mouseYmax = mouseY;
                // Start Drawing
                context.beginPath();
                context.moveTo(mouseX, mouseY);
@@ -52,7 +64,15 @@
             canvas.addEventListener('mousemove', function(event) {
                setMouseCoordinates(event);
 
-               if(isDrawing){
+               if(isDrawing)
+               {
+                  if(mouseXmin>mouseX)mouseXmin = mouseX;
+                  else if(mouseXmax<mouseX)mouseXmax = mouseX;
+
+                  if(mouseYmin>mouseY)mouseYmin = mouseY;
+                  else if(mouseYmax<mouseY)mouseYmax = mouseY;
+
+                  xyMatrix.push([mouseX, mouseY]);
                   context.lineTo(mouseX, mouseY);
                   context.stroke();
                }
@@ -62,6 +82,24 @@
             canvas.addEventListener('mouseup', function(event) {
                setMouseCoordinates(event);
                isDrawing = false;
+               console.log(mouseXmin,mouseYmin,mouseXmax,mouseYmax);
+               console.log(xyMatrix);
+
+               let unique = xyMatrix.map(ar=>JSON.stringify(ar))
+               .filter((itm, idx, arr) => arr.indexOf(itm) === idx)
+               .map(str=>JSON.parse(str));
+               let resStr = "UPDATE;DATA;8;FREEDRAW-";
+               unique.forEach((v)=>{
+                  resStr += v[0]+":"+v[1]+"-"
+               });
+               console.log(unique);
+               console.log(resStr);
+               resStr+=";";
+
+
+               // disable this to stop sending
+               sendWS(resStr);
+
             });
 
             // Handle Mouse Coordinates
@@ -84,12 +122,13 @@
    
    <body>
       <div id = "sse">
+         <canvas id="canvas" width="640" height="400"></canvas>
          <div id="output"></div>
          <div id="control">
          <input type="text" id="command" value="LOGIN;test;test">
          <input type="button" id="connect" value="connect" onClick="connectWS()">
          <input type="button" id="send" value="send" onClick="sendWS()">
-         <canvas id="canvas" width="640" height="400"></canvas>
+         
          </div>
       </div>
       
