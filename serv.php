@@ -96,7 +96,7 @@ while (true){
         socket_write($tsoc, $headers, strlen($headers));
             
         // add client to client table
-        $clients[]=[$tsoc,0,["user_id"=>null]];
+        $clients[]=[$tsoc,0,["user_id"=>null, "drawing_id"=>null]];
     }
     // loop through client connections
     foreach($clients as &$msgsock1){
@@ -159,37 +159,76 @@ while (true){
                 }
 
 
-                if($comm1[2]=="DATA"){
+                if($comm1[1]=="DATA"){
+                    if(empty($msgsock1[2]["drawing_id"])){
+                        $msg = "SELECTDRAWINGERROR";
+                        send($msgsock, $msg);
+                        break;
+                    }
                     $query = $conn->prepare('INSERT INTO data (user_id, drawing_id,deleted) VALUES (?,?,0)');
-                    $query->execute([$msgsock1[2]["user_id"], $comm1[2]]);
-                    $id = $db->lastInsertId();
-                } else if($comm1[2] == "DRAWING"){
+                    $query->execute([$msgsock1[2]["user_id"], $msgsock1[2]["drawing_id"]]);
+                    $id = $conn->lastInsertId();
+                } else if($comm1[1] == "DRAWING"){
                     $query = $conn->prepare('INSERT INTO drawing (owner_id,name,description,deleted) VALUES (?,?,?,0)');
                     $query->execute([$msgsock1[2]["user_id"], $comm1[2],$comm1[3]]);
-                    $id = $db->lastInsertId();
+                    $id = $conn->lastInsertId();
                 } else{
                     $id = "ERROR";
                 }
                 send($msgsock, $id);
                 break;
+            case "SELECT":
+                if(empty($msgsock1[2]["user_id"])){
+                    $msg = "AUTHERROR";
+                    send($msgsock, $msg);
+                    break;
+                }
+                $msgsock1[2]["drawing_id"]=$comm1[1];
+                $msg = "OK";
+                send($msgsock, $msg);
+                break;   
             case "UPDATE":
                 if(empty($msgsock1[2]["user_id"])){
                     $msg = "AUTHERROR";
                     send($msgsock, $msg);
                     break;
                 }
-                if($comm1[2]=="DATA"){
+                if($comm1[1]=="DATA"){
                     
                     // missing exists check
                     $query = $conn->prepare('UPDATE data SET command=? WHERE user_id = ? AND id = ?');
                     $query->execute([$comm1[3], $msgsock1[2]["user_id"], $comm1[2]]);
-                    $id = $db->lastInsertId();
-                } else if($comm1[2] == "DRAWING"){
+                    $msg = "OK";
+                } else if($comm1[1] == "DRAWING"){
 
                 } else{
-                    $id = "ERROR";
+                    $msg = "ERROR";
                 }
+                send($msgsock, $msg);
                 break;
+                case "GET":
+                    if(empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])){
+                        $msg = "AUTHERROR";
+                        send($msgsock, $msg);
+                        break;
+                    }
+                    if(isset($comm1[1]) && is_int($comm1[1])){
+                        $query = $conn->prepare('SELECT * FROM data where drawing_id =? AND id>?');
+                        $query->execute([$msgsock1[2]["drawing_id"],$comm1[1]]);
+                        $rows = $query->fetchAll();
+                    } else {
+                        $query = $conn->prepare('SELECT * FROM data where drawing_id =?');
+                        $query->execute([$msgsock1[2]["drawing_id"]]);
+                        $rows = $query->fetchAll();
+                        var_dump($rows);
+                    }
+                    $getLastId = end($rows);
+                    $resultStr = $getLastId["id"].";";
+                    foreach ($rows as $row){
+                        $resultStr.=$row["command"].";";
+                    }
+                    send($msgsock, $resultStr);
+                    break;
         }
     }  
 }
