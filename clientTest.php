@@ -60,6 +60,12 @@
                } catch (err) { console.error(err) }
             } else {
                socket.send(msg)
+               const result = await new Promise((resolve) =>  {
+                  socket.on("message", (data) => {
+                     queue.push(data)
+                     resolve();
+                  });
+               }):
             }
          }
 
