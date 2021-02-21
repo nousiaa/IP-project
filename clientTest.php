@@ -20,13 +20,41 @@
                 document.getElementById("output").innerHTML+="<b>"+document.getElementById("command").value+":<b></b>\n</br>";
                 document.getElementById("output").innerHTML+=event.data+"\n</br>";
             });
-
          }
 
-         function sendWS(data){
+         const waitConnection = (socket) => {
+            return new Promise((resolve, reject) => {
+               const numberOfAttempts = 10
+               const intervalTime = 1000
 
-            if(!data)socket.send(document.getElementById("command").value);
-            else socket.send(data);
+               let currentAttempt = 0
+
+               const interval = setInterval(() => {
+
+                  if( currentAttempt > numberOfAttempts -1) {
+                     clearInterval(interval)
+                     reject(new Error('Maximum number of attempts'))
+                  } else if (socket.readyState === socket.OPEN) {
+                     clearInterval(interval)
+                     resolve()
+                  }
+                  currentAttempt++
+               }, intervalTime);
+            });
+         }
+
+
+         const sendMessage = async (socket,msg) => {
+            if(socket.readystate !== socket.OPEN) {
+               try {
+                  await waitConnection(socket)
+                  if(!msg)socket.send(document.getElementById("command").value);
+                  else socket.send(msg)
+               } catch (err) { console.error(err) }
+            } else {
+               if(!msg)socket.send(document.getElementById("command").value);
+               else socket.send(msg);
+            }
          }
 
          window.onload = () => {
@@ -45,6 +73,8 @@
             context.strokeStyle = 'black';
             context.lineWidth = 1; // initial brush width
             let isDrawing = false;
+
+
 
             //Start drawing when mouse is clicked down
             canvas.addEventListener('mousedown', function(event) {
@@ -98,7 +128,7 @@
 
 
                // disable this to stop sending
-               sendWS(resStr);
+               sendMessage(socket,resStr);
 
             });
 
