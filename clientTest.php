@@ -45,6 +45,7 @@
 
 
          const sendMessage = async (socket,msg) => {
+            document.getElementById("command").value=msg;
             if(socket.readystate !== socket.OPEN) {
                try {
                   await waitConnection(socket)
@@ -74,8 +75,9 @@
             context.lineWidth = 1; // initial brush width
             let isDrawing = false;
 
-
-
+            connectWS();
+            sendMessage(socket,"LOGIN;test;test;");
+            //sendMessage(socket,"LOGIN;test;test;");
             //Start drawing when mouse is clicked down
             canvas.addEventListener('mousedown', function(event) {
                setMouseCoordinates(event);
