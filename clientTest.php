@@ -68,7 +68,7 @@
                      socket.on("message", (data) => {
                         resolve(data);
                      });
-                  }).then(.then( value => {
+                  }).then( value => {
                         return value
                   });
                }
