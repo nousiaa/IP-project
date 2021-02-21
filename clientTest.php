@@ -6,7 +6,6 @@
       <script type = "text/javascript">
          let data = "test;";//"LOGIN;test;test"
          let socket = null;
-         let queue = []
          function connectWS() {
             socket = new WebSocket("ws://127.0.0.1:10000");
             // Connection opened
@@ -44,28 +43,35 @@
          }
 
 
-         const sendMessage = async (socket,msg) => {
+         const sendMessage = async (socket, msg, waitForResponse) => {
             document.getElementById("command").value=msg;
             if(socket.readystate !== socket.OPEN) {
                try {
                   await waitConnection(socket)
                   socket.send(msg)
                   //NOT SURE IF WORKS!
-                  const result = await new Promise((resolve) =>  {
-                     socket.on("message", (data) => {
-                        queue.push(data)
-                        resolve();
+                  if( waitForResponse ? true : false) {
+                     const result = await new Promise((resolve) =>  {
+                        socket.on("message", (data) => {
+                           resolve(data);
+                        });
+                     }).then( value => {
+                        return value
                      });
-                  }):
+                     
+                  }
                } catch (err) { console.error(err) }
             } else {
                socket.send(msg)
-               const result = await new Promise((resolve) =>  {
-                  socket.on("message", (data) => {
-                     queue.push(data)
-                     resolve();
+               if( waitForResponse ? true : false) {
+                  const result = await new Promise((resolve) =>  {
+                     socket.on("message", (data) => {
+                        resolve(data);
+                     });
+                  }).then(.then( value => {
+                        return value
                   });
-               }):
+               }
             }
          }
 
@@ -94,7 +100,7 @@
             let isDrawing = false;
 
             connectWS();
-            sendMessage(socket,"LOGIN;test;test;");
+            sendMessage(socket,"LOGIN;test;test;", true);
             //sendMessage(socket,"LOGIN;test;test;");
             //Start drawing when mouse is clicked down
             canvas.addEventListener('mousedown', function(event) {
