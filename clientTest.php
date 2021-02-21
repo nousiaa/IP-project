@@ -52,8 +52,8 @@
                   //NOT SURE IF WORKS!
                   if( waitForResponse ? true : false) {
                      const result = await new Promise((resolve) =>  {
-                        socket.addEventListener("message", (data) => {
-                           resolve(data);
+                        socket.onmessage = (event) => {
+                           resolve(event.data);
                         });
                      }).then( value => {
                         return value
@@ -65,8 +65,8 @@
                socket.send(msg)
                if( waitForResponse ? true : false) {
                   const result = await new Promise((resolve) =>  {
-                     socket.addEventListener("message", (data) => {
-                        resolve(data);
+                     socket.onmessage = (event) => {
+                           resolve(event.data);
                      });
                   }).then( value => {
                         return value
