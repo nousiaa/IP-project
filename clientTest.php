@@ -6,6 +6,8 @@
       <script type = "text/javascript">
          let data = "test;";//"LOGIN;test;test"
          let socket = null;
+
+
          function connectWS() {
             socket = new WebSocket("ws://127.0.0.1:10000");
             // Connection opened
@@ -14,13 +16,13 @@
                 document.getElementById("connect").disabled= true
             });
 
-            // Listen for messages
-            socket.addEventListener('message', function(event) {
-               receiveMessage(event.data)
-            });
-
+            defaultMessageListener(socket)
 
          }
+
+         /*
+         *Waits for connection to be established, terminates if connection doesn't work after x number times.
+         */
 
          const waitConnection = (socket) => {
             return new Promise((resolve, reject) => {
@@ -34,7 +36,7 @@
                      clearInterval(interval)
                      reject(new Error('Maximum number of attempts'))
                   } else if (socket.readyState === socket.OPEN) {
-                     clearInterval(interval)
+                     clearInterval(interval)  
                      resolve()
                   }
                   currentAttempt++
@@ -43,43 +45,45 @@
          }
 
 
-         const sendMessage = async (socket, msg, waitForResponse) => {
+         const sendMessage = async (socket, msg, callback) => {
             document.getElementById("command").value=msg;
             if(socket.readystate !== socket.OPEN) {
                try {
                   await waitConnection(socket)
-                  socket.send(msg)
-                  //NOT SURE IF WORKS!
-                  if( waitForResponse ? true : false) {
-                     const result = await new Promise((resolve) =>  {
-                        socket.onmessage = (event) => {
-                           resolve(event.data);
-                        });
-                     }).then( value => {
-                        return value
-                     });
-                     
+                  if(!!callback) {
+                     socket.send(msg)
+                     return receiveMessage(socket)
                   }
+                  socket.send(msg)
                } catch (err) { console.error(err) }
             } else {
-               socket.send(msg)
-               if( waitForResponse ? true : false) {
-                  const result = await new Promise((resolve) =>  {
-                     socket.onmessage = (event) => {
-                           resolve(event.data);
-                     });
-                  }).then( value => {
-                        return value
-                  });
+               if(!!callback) {
+                  socket.send(msg)
+                  return receiveMessage(socket)
                }
+               socket.send(msg)
             }
          }
 
-         const receiveMessage = (data) => {
-            console.log('Message from server ', data);
-            document.getElementById("output").innerHTML+="<b>"+document.getElementById("command").value+":<b></b>\n</br>";
-            document.getElementById("output").innerHTML+=event.data+"\n</br>";
-            return data
+         const defaultMessageListener = (socket) => {
+            socket.onmessage = null
+            socket.onmessage = (event) => {
+               console.log('Message from server ', event.data);
+               document.getElementById("output").innerHTML+="<b>"+document.getElementById("command").value+":<b></b>\n</br>";
+               document.getElementById("output").innerHTML+=event.data+"\n</br>";
+            }
+         }
+
+         const receiveMessage = (socket) => {
+            const res = new Promise( (resolve) => {
+               socket.onmessage =   null
+               socket.onmessage = (event) => {
+                  resolve(event.data);
+               }
+            }).then(defaultMessageListener(socket))
+
+            return res
+            
          }
 
          window.onload = () => {
