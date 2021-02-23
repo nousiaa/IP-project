@@ -25,7 +25,7 @@
          */
 
          const waitConnection = (socket) => {
-            return new Promise((resolve, reject) => {
+            return new Promise( (resolve, reject) => {
                const numberOfAttempts = 10
                const intervalTime = 1000
 
@@ -65,6 +65,7 @@
             }
          }
 
+         //TODO: Add default behaviour
          const defaultMessageListener = (socket) => {
             socket.onmessage = null
             socket.onmessage = (event) => {
@@ -76,7 +77,7 @@
 
          const receiveMessage = (socket) => {
             const res = new Promise( (resolve) => {
-               socket.onmessage =   null
+               socket.onmessage = null
                socket.onmessage = (event) => {
                   resolve(event.data);
                }
@@ -126,11 +127,10 @@
 
                if(isDrawing)
                {
-                  if(mouseXmin>mouseX)mouseXmin = mouseX;
-                  else if(mouseXmax<mouseX)mouseXmax = mouseX;
-
-                  if(mouseYmin>mouseY)mouseYmin = mouseY;
-                  else if(mouseYmax<mouseY)mouseYmax = mouseY;
+                  mouseXmin = (mouseXmin>mouseX) ? mouseXmin : mouseX
+                  mouseXmax = (mouseXmax<mouseX) ? mouseXmax : mouseX
+                  mouseYmin = (mouseYmin>mouseY) ? mouseYmin : mouseY
+                  mouseYmax = (mouseYmax<mouseY) ? mouseYmax : mouseY
 
                   xyMatrix.push([mouseX, mouseY]);
                   context.lineTo(mouseX, mouseY);
