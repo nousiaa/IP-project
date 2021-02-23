@@ -46,7 +46,7 @@
 
 
          const sendMessage = async (socket, msg, callback) => {
-            document.getElementById("command").value=msg;
+            document.getElementById("output").innerHTML+="<b>"+msg+":<b></b>\n</br>";
             if(socket.readystate !== socket.OPEN) {
                try {
                   await waitConnection(socket)
@@ -69,25 +69,27 @@
          const defaultMessageListener = (socket) => {
             socket.onmessage = null
             socket.onmessage = (event) => {
-               console.log('Message from server ', event.data);
-               document.getElementById("output").innerHTML+="<b>"+document.getElementById("command").value+":<b></b>\n</br>";
+               console.log('Message from server ', event.data);               
                document.getElementById("output").innerHTML+=event.data+"\n</br>";
             }
          }
 
          const receiveMessage = (socket) => {
             const res = new Promise( (resolve) => {
-               socket.onmessage = null
                socket.onmessage = (event) => {
+                  socket.onmessage=defaultMessageListener(socket);
                   resolve(event.data);
                }
-            }).then(defaultMessageListener(socket))
+            });
 
             return res
             
          }
 
          window.onload = () => {
+            windowAlmostLoad()
+         }
+         async function windowAlmostLoad(){
             let canvas = document.getElementById("canvas");
             let context = canvas.getContext("2d");
             let boundings = canvas.getBoundingClientRect();
@@ -104,8 +106,10 @@
             context.lineWidth = 1; // initial brush width
             let isDrawing = false;
 
-            connectWS();
-            sendMessage(socket,"LOGIN;test;test;", true);
+            await connectWS();
+            console.log(await sendMessage(socket,"LOGIN;test;test;", true));
+            console.log(await sendMessage(socket,"SELECT;8;", true));
+            
             //sendMessage(socket,"LOGIN;test;test;");
             //Start drawing when mouse is clicked down
             canvas.addEventListener('mousedown', function(event) {
