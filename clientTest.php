@@ -127,10 +127,11 @@
 
                if(isDrawing)
                {
-                  mouseXmin = (mouseXmin>mouseX) ? mouseXmin : mouseX
-                  mouseXmax = (mouseXmax<mouseX) ? mouseXmax : mouseX
-                  mouseYmin = (mouseYmin>mouseY) ? mouseYmin : mouseY
-                  mouseYmax = (mouseYmax<mouseY) ? mouseYmax : mouseY
+                  mouseXmin = (mouseXmin>mouseX) ? mouseX : mouseXmin
+                  mouseYmin = (mouseYmin>mouseY) ? mouseY : mouseYmin
+
+                  mouseXmax = (mouseXmax<mouseX) ? mouseX : mouseXmax
+                  mouseYmax = (mouseYmax<mouseY) ? mouseY : mouseYmax
 
                   xyMatrix.push([mouseX, mouseY]);
                   context.lineTo(mouseX, mouseY);
