@@ -89,7 +89,19 @@
          const parseMessage = (msg) => {
             return msg.split(";")
          }
+         async function doLogin(){
+            const result = await sendMessage(socket,"LOGIN;"+document.getElementById('username').value+";"+document.getElementById('password').value+";", true);
+            if(result=='success') {
+               document.getElementById('loggedinname').innerHTML = document.getElementById('username').value;
+               document.getElementById('needlogin').style.display = 'none';
+               document.getElementById('loggedin').style.display = '';
+            }
 
+            console.log(result);
+            return result;
+         }
+         async function doLogout(){
+         }
          window.onload = () => {
             windowAlmostLoad()
          }
@@ -111,8 +123,8 @@
             let isDrawing = false;
 
             await connectWS();
-            console.log(await sendMessage(socket,"LOGIN;test;test;", true));
-            console.log(await sendMessage(socket,"SELECT;8;", true));
+            //console.log(await sendMessage(socket,"LOGIN;test;test;", true));
+            //console.log(await sendMessage(socket,"SELECT;8;", true));
             
             //sendMessage(socket,"LOGIN;test;test;");
             //Start drawing when mouse is clicked down
@@ -191,10 +203,24 @@
    
    <body>
       <div id = "sse">
+         <div id="loginbox">
+            <div id="needlogin">
+               Username: <input type="text" id="username" value="test">
+               Password: <input type="text" id="password" value="test">
+               <input type="button" id="login" value="Login" onClick="doLogin();">
+            </div>
+            <div id="loggedin" style="display:none;">
+            Logged in as: 
+            <div id="loggedinname" style="display: inline;"></div>
+            <input type="button" id="login" value="Logout" onClick="doLogout();">
+            </div>
+         </div>
+         <div id="drawselect">
+         </div>
          <canvas id="canvas" width="640" height="400"></canvas>
          <div id="output"></div>
          <div id="control">
-         <input type="text" id="command" value="LOGIN;test;test">
+         <input type="text" id="command" value="">
          <input type="button" id="connect" value="connect" onClick="connectWS()">
          <input type="button" id="send" value="send" onClick="sendMessage(socket,document.getElementById('command').value)">
          
