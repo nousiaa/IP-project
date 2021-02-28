@@ -86,6 +86,10 @@
             
          }
 
+         const parseMessage = (msg) => {
+            return msg.split(";")
+         }
+
          window.onload = () => {
             windowAlmostLoad()
          }
