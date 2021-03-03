@@ -6,11 +6,14 @@
  * send data to websocket TODO: add support for mask
  */
 function send($client,$msg){
+    echo $msg;
     $mlen = strlen($msg);
+    echo $mlen;
     $mlenresult = chr($mlen);
+    echo $mlenresult;
     if ($mlen > 65536) {
         $mlenresult = chr(127).substr(pack('J', $mlen),0);
-    } else if($mlen>256 ) {
+    } else if($mlen>127 ) {
         $mlenresult = chr(126).substr(pack('J', $mlen),6);
     }
     $msg = chr(129) . $mlenresult . $msg;
@@ -177,6 +180,8 @@ while (true){
                 }
                 send($msgsock, $id);
                 break;
+
+
             case "SELECT":
                 if(empty($msgsock1[2]["user_id"])){
                     $msg = "AUTHERROR";
@@ -206,15 +211,17 @@ while (true){
                 }
                 send($msgsock, $msg);
                 break;
-                case "GET":
-                    if(empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])){
-                        $msg = "AUTHERROR";
-                        send($msgsock, $msg);
-                        break;
-                    }
-                    if(isset($comm1[1]) && is_int($comm1[1])){
+            case "LIST":
+                if(empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))){
+                    $msg = "AUTHERROR";
+                    send($msgsock, $msg);
+                    break;
+                }
+
+                if ($comm1[1]=="DATA") {
+                    if (isset($comm1[2]) && is_int($comm1[2])) {
                         $query = $conn->prepare('SELECT * FROM data where drawing_id =? AND id>?');
-                        $query->execute([$msgsock1[2]["drawing_id"],$comm1[1]]);
+                        $query->execute([$msgsock1[2]["drawing_id"],$comm1[2]]);
                         $rows = $query->fetchAll();
                     } else {
                         $query = $conn->prepare('SELECT * FROM data where drawing_id =?');
@@ -224,11 +231,32 @@ while (true){
                     }
                     $getLastId = end($rows);
                     $resultStr = $getLastId["id"].";";
-                    foreach ($rows as $row){
+                    foreach ($rows as $row) {
                         $resultStr.=$row["command"].";";
                     }
                     send($msgsock, $resultStr);
                     break;
+                } else if($comm1[1]=="DRAWING"){
+                    if(empty($msgsock1[2]["user_id"])){
+                        $msg = "AUTHERROR";
+                        send($msgsock, $msg);
+                        break;
+                    }
+                    $query = $conn->prepare('SELECT * FROM drawing');
+                    $query->execute([]);
+                    $rows = $query->fetchAll();
+                    $msg = "";
+                    foreach($rows as $row){
+                        $msg .= $row["id"].":".$row["name"].":".$row["description"].";";
+                    }
+                    
+                    send($msgsock, $msg);
+                    break;  
+                }
+                $msg = "ERROR";
+                send($msgsock, $msg);
+                break; 
+
         }
     }  
 }
