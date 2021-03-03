@@ -100,6 +100,22 @@
             console.log(result);
             return result;
          }
+         async function selectDraw(id){
+            return await sendMessage(socket,"SELECT;"+id+";", true);
+         }
+
+
+         async function updateList(){
+            const result = await sendMessage(socket,"LIST;DRAWING;", true);
+            var rows  = result.split(";");
+            console.log(rows);
+            document.getElementById('connectList').innerHTML = "<tr><th>Name</th><th>Description</th><th>Connect</th></tr>";
+            rows.forEach(x=>{
+               var subrow = x.split(":");
+               console.log(subrow);
+               if(subrow[0]) document.getElementById('connectList').innerHTML +="<tr><td>"+subrow[1]+"</td><td>"+subrow[2]+"</td><td><input type='button' id='Connect"+subrow[0]+"' value='Connect' onClick='selectDraw("+subrow[0]+");'></td></tr>";
+            });
+         }
          async function doLogout(){
          }
          window.onload = () => {
@@ -210,13 +226,16 @@
                <input type="button" id="login" value="Login" onClick="doLogin();">
             </div>
             <div id="loggedin" style="display:none;">
-            Logged in as: 
-            <div id="loggedinname" style="display: inline;"></div>
-            <input type="button" id="login" value="Logout" onClick="doLogout();">
+               Logged in as: 
+               <div id="loggedinname" style="display: inline;"></div>
+               <input type="button" id="login" value="Logout" onClick="doLogout();">
+               <div id="drawselect">
+                  <input type="button" id="login" value="LIST DRAWINGS" onClick="updateList();">
+                  <table id="connectList" style=""></table>
+               </div>
             </div>
          </div>
-         <div id="drawselect">
-         </div>
+
          <canvas id="canvas" width="640" height="400"></canvas>
          <div id="output"></div>
          <div id="control">
