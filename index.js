@@ -136,6 +136,7 @@ async function windowAlmostLoad() {
   let canvas = document.getElementById("canvas");
   let context = canvas.getContext("2d");
   let boundings = canvas.getBoundingClientRect();
+  let resultString = "";
   let xyMatrix = [];
   let mouseXmin = 0;
   let mouseYmin = 0;
@@ -149,7 +150,7 @@ async function windowAlmostLoad() {
   context.lineWidth = 1; // initial brush width
   let isDrawing = false;
 
-  await connectWS();
+  connectWS();
   //console.log(await sendMessage(socket,"LOGIN;test;test;", true));
   //console.log(await sendMessage(socket,"SELECT;8;", true));
 
@@ -178,8 +179,9 @@ async function windowAlmostLoad() {
 
       mouseXmax = mouseXmax < mouseX ? mouseX : mouseXmax;
       mouseYmax = mouseYmax < mouseY ? mouseY : mouseYmax;
+      resultString += String.fromCharCode(mouseX&255)+String.fromCharCode((mouseX>>8)&255)+String.fromCharCode(mouseY&255)+String.fromCharCode((mouseY>>8)&255)
+      console.log(resultString)
 
-      xyMatrix.push([mouseX, mouseY]);
       context.lineTo(mouseX, mouseY);
       context.stroke();
     }
@@ -191,21 +193,10 @@ async function windowAlmostLoad() {
     isDrawing = false;
     console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
     console.log(xyMatrix);
-
-    let unique = xyMatrix
-      .map((ar) => JSON.stringify(ar))
-      .filter((itm, idx, arr) => arr.indexOf(itm) === idx)
-      .map((str) => JSON.parse(str));
-    let resStr = "UPDATE;DATA;8;FREEDRAW-";
-    unique.forEach((v) => {
-      resStr += v[0] + ":" + v[1] + "-";
-    });
-    console.log(unique);
-    console.log(resStr);
-    resStr += ";";
-
-    // disable this to stop sending
-    sendMessage(socket, resStr);
+    let encodedData = window.btoa(resultString)
+    sendMessage(socket,resultString)
+    console.log(encodedData)
+    resultString = ""
   });
 
   // Handle Mouse Coordinates
