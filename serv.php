@@ -170,11 +170,11 @@ while (true){
                     }
                     $query = $conn->prepare('INSERT INTO data (user_id, drawing_id,deleted) VALUES (?,?,0)');
                     $query->execute([$msgsock1[2]["user_id"], $msgsock1[2]["drawing_id"]]);
-                    $id = $conn->lastInsertId();
+                    $id = "DATAID;".$conn->lastInsertId();
                 } else if($comm1[1] == "DRAWING"){
                     $query = $conn->prepare('INSERT INTO drawing (owner_id,name,description,deleted) VALUES (?,?,?,0)');
                     $query->execute([$msgsock1[2]["user_id"], $comm1[2],$comm1[3]]);
-                    $id = $conn->lastInsertId();
+                    $id = "DRAWINGID;".$conn->lastInsertId();
                 } else{
                     $id = "ERROR";
                 }
