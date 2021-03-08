@@ -79,9 +79,10 @@ const receiveMessage = (socket) => {
 };
 
 const convert64BaseStringToCoordinates = (str) => {
-  for (i = 0; i < str.length; i += 4) {
-    let mouseX = str.charCodeAt(i) + (str.charCodeAt(i + 1) << 8);
-    let mouseY = str.charCodeAt(i + 2) + (str.charCodeAt(i + 3) << 8);
+  parseString = window.atob(str)
+  for (i = 0; i < parseString.length; i += 4) {
+    let mouseX = parseString.charCodeAt(i) + (parseString.charCodeAt(i + 1) << 8);
+    let mouseY = parseString.charCodeAt(i + 2) + (parseString.charCodeAt(i + 3) << 8);
     console.log(mouseX);
     console.log(mouseY);
     let canvas = document.getElementById("canvas");
