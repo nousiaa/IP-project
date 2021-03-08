@@ -58,7 +58,7 @@ const sendMessage = async (socket, msg, callback) => {
   }
 };
 
-//TODO: Add default behaviour
+//TODO: Add default behaviour, such as parsing message.
 const defaultMessageListener = (socket) => {
   socket.onmessage = null;
   socket.onmessage = (event) => {
@@ -78,9 +78,24 @@ const receiveMessage = (socket) => {
   return res;
 };
 
-const parseMessage = (msg) => {
-  return msg.split(";");
+const convert64BaseStringToCoordinates = (str) => {
+  for (i = 0; i < str.length; i += 4) {
+    let mouseX = str.charCodeAt(i) + (str.charCodeAt(i + 1) << 8);
+    let mouseY = str.charCodeAt(i + 2) + (str.charCodeAt(i + 3) << 8);
+    console.log(mouseX);
+    console.log(mouseY);
+    let canvas = document.getElementById("canvas");
+    let context = canvas.getContext("2d");
+    context.lineTo(mouseX, mouseY);
+    context.stroke();
+  }
 };
+
+const parseMessage = (msg) => {
+  const splittedString = msg.split(";");
+  console.log(splittedString);
+};
+
 async function doLogin() {
   const result = await sendMessage(
     socket,
@@ -179,8 +194,11 @@ async function windowAlmostLoad() {
 
       mouseXmax = mouseXmax < mouseX ? mouseX : mouseXmax;
       mouseYmax = mouseYmax < mouseY ? mouseY : mouseYmax;
-      resultString += String.fromCharCode(mouseX&255)+String.fromCharCode((mouseX>>8)&255)+String.fromCharCode(mouseY&255)+String.fromCharCode((mouseY>>8)&255)
-      console.log(resultString)
+      resultString +=
+        String.fromCharCode(mouseX & 255) +
+        String.fromCharCode((mouseX >> 8) & 255) +
+        String.fromCharCode(mouseY & 255) +
+        String.fromCharCode((mouseY >> 8) & 255);
 
       context.lineTo(mouseX, mouseY);
       context.stroke();
@@ -193,10 +211,10 @@ async function windowAlmostLoad() {
     isDrawing = false;
     console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
     console.log(xyMatrix);
-    let encodedData = window.btoa(resultString)
-    sendMessage(socket,resultString)
-    console.log(encodedData)
-    resultString = ""
+    let encodedData = window.btoa(resultString);
+    sendMessage(socket, encodedData);
+    console.log(encodedData);
+    resultString = "";
   });
 
   // Handle Mouse Coordinates
