@@ -79,17 +79,26 @@ const receiveMessage = (socket) => {
 };
 
 const convert64BaseStringToCoordinates = (str) => {
-  parseString = window.atob(str)
-  for (i = 0; i < parseString.length; i += 4) {
-    let mouseX = parseString.charCodeAt(i) + (parseString.charCodeAt(i + 1) << 8);
-    let mouseY = parseString.charCodeAt(i + 2) + (parseString.charCodeAt(i + 3) << 8);
+  parseString = window.atob(str);
+  let canvas = document.getElementById("canvas");
+  let context = canvas.getContext("2d");
+  let startX = parseString.charCodeAt(0) + (parseString.charCodeAt(1) << 8);
+  let startY = parseString.charCodeAt(2) + (parseString.charCodeAt(3) << 8);
+  console.log(startX);
+  console.log(startY);
+  context.beginPath();
+  context.moveTo(startX, startY);
+  for (i = 4; i < parseString.length; i += 4) {
+    let mouseX =
+      parseString.charCodeAt(i) + (parseString.charCodeAt(i + 1) << 8);
+    let mouseY =
+      parseString.charCodeAt(i + 2) + (parseString.charCodeAt(i + 3) << 8);
     console.log(mouseX);
     console.log(mouseY);
-    let canvas = document.getElementById("canvas");
-    let context = canvas.getContext("2d");
     context.lineTo(mouseX, mouseY);
     context.stroke();
   }
+  context.closePath();
 };
 
 const parseMessage = (msg) => {
@@ -211,7 +220,6 @@ async function windowAlmostLoad() {
     setMouseCoordinates(event);
     isDrawing = false;
     console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
-    console.log(xyMatrix);
     let encodedData = window.btoa(resultString);
     sendMessage(socket, encodedData);
     console.log(encodedData);
