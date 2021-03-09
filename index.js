@@ -4,12 +4,12 @@ var currentTMPid = 0;
 let socket = null;
 var drawmode = 0;
 
-function updateNote(noteid,notedata) {
-  console.log(note);
+function updateNote(noteid,notedata,x,y) {
+
   const nid = noteid.split("_")
   if (nid[1]) {
     
-    socket.send("UPDATE;DATA;" + nid[1] + ";NOTE;"+ atob(notedata));
+    socket.send("UPDATE;DATA;" + nid[1] + ";NOTE:"+ btoa(noteid+":"+x+":"+y+":"+notedata));
   }
 }
 
@@ -25,8 +25,9 @@ function connectWS() {
     console.log(tmpdata);
     if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
     else if (tmpdata[0] == "UUPDATE") {
-      if (tmpdata[2] == "DATA")convert64BaseStringToCoordinates(tmpdata[3]);
-      else if (tmpdata[2] == "NOTE")convert64BaseStringToNote(tmpdata[3]);
+      const tmpdata1 = tmpdata[2].split(":");
+      if (tmpdata1[0] == "DATA")convert64BaseStringToCoordinates(tmpdata1[1]);
+      else if (tmpdata1[0] == "NOTE")convert64BaseStringToNote(tmpdata1[1]);
       
     }
     else if (tmpdata[0] == "DRAWINGSELECTED"){
@@ -36,6 +37,10 @@ function connectWS() {
       let canvascc1 = canvasc1.getContext("2d");
       canvascc.clearRect(0, 0, canvasc.width, canvasc.height);
       canvascc1.clearRect(0, 0, canvasc1.width, canvasc1.height);
+      let itm = document.getElementsByClassName("drawNote");
+      while(itm.length > 0){
+        itm[0].parentNode.removeChild(itm[0]);
+      };
       socket.send("SEND;DATA;");
     }
     else if (tmpdata[0] == "DRAWINGLIST"){
@@ -66,19 +71,8 @@ function connectWS() {
       document.getElementById("needlogin").style.display = "none";
       document.getElementById("loggedin").style.display = "";
     } else if (tmpdata[0] == "NEWNOTE"){
+      createNote("note_"+tmpdata[1],tmpdata[2],tmpdata[3],"");
 
-      const noteID = "note_"+tmpdata[1];
-    
-      let input = document.createElement("input");
-      input.type = "text";
-      input.id=noteID;
-      input.oninput = function(){updateNote(this.id, this.value);};
-      input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
-      input.style.left = tmpdata[2]+"px";
-      input.style.top = tmpdata[3]+"px";
-      console.log(noteID);
-    
-      document.getElementById("canvDIV").appendChild(input)
     }
 
 
@@ -91,7 +85,28 @@ function connectWS() {
 
   defaultMessageListener(socket);
 } 
+function createNote(noteID,x,y,tvalue){
+  const existingnote = document.getElementById(noteID);
 
+  if(existingnote){
+    existingnote.value=tvalue;
+  } else {
+    let input = document.createElement("input");
+    input.type = "text";
+    input.id=noteID;
+    input.oninput = function(){updateNote(this.id, this.value,x,y);};
+    input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
+    input.style.left = x+"px";
+    input.style.top = y+"px";
+    input.value=tvalue;
+    input.classList.add("drawNote");
+    console.log(noteID);
+  
+    document.getElementById("canvDIV").appendChild(input)
+  }
+
+
+}
 /*
  *Waits for connection to be established, terminates if connection doesn't work after x number times.
  */
@@ -166,10 +181,9 @@ function setDrawMode(){
 };
 
 const convert64BaseStringToNote = (str) => {
-
-  console.log("data:"+str);
-
-
+  const note = atob(str).split(":");
+  console.log(note);
+  createNote(note[0],note[1],note[2],note[3]);
 };
 const convert64BaseStringToCoordinates = (str) => {
   parseString = window.atob(str);
@@ -297,7 +311,7 @@ async function windowAlmostLoad() {
 
       context.lineTo(mouseX, mouseY);
       context.stroke();
-        result1string = "DATA;"+window.btoa(resultString);
+        result1string = "DATA:"+window.btoa(resultString);
       }
   });
 
@@ -308,7 +322,7 @@ async function windowAlmostLoad() {
       isDrawing = false;
       //console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
       
-      result1string = "DATA;"+window.btoa(resultString);
+      result1string = "DATA:"+window.btoa(resultString);
       sendDataInterval();
 
       //console.log(encodedData);
