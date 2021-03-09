@@ -4,7 +4,7 @@ var currentTMPid = 0;
 let socket = null;
 
 function connectWS() {
-  socket = new WebSocket("ws://n0p0.com:8080");
+  socket = new WebSocket("ws://127.0.0.1:8080");
   // Connection opened
   socket.addEventListener("open", function (event) {
     document.getElementById("output").innerHTML += "<b>CONNECTED<b></b>\n</br>";
@@ -14,8 +14,8 @@ function connectWS() {
     const tmpdata = event.data.split(";");
     console.log(tmpdata);
     if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
-    if(tmpdata[0] == "UNWANTEDUPDATE") convert64BaseStringToCoordinates(tmpdata[2])
-    if(tmpdata[0] == "DRAWINGSELECTED"){
+    else if (tmpdata[0] == "UNWANTEDUPDATE") convert64BaseStringToCoordinates(tmpdata[2])
+    else if (tmpdata[0] == "DRAWINGSELECTED"){
       let canvasc = document.getElementById("canvas")
       let canvascc = canvasc.getContext("2d");
       let canvasc1 = document.getElementById("canvas1")
@@ -23,6 +23,34 @@ function connectWS() {
       canvascc.clearRect(0, 0, canvasc.width, canvasc.height);
       canvascc1.clearRect(0, 0, canvasc1.width, canvasc1.height);
       socket.send("SEND;DATA;");
+    }
+    else if (tmpdata[0] == "DRAWINGLIST"){
+      let rows = tmpdata;
+      console.log(rows);
+      document.getElementById("connectList").innerHTML =
+        "<tr><th>Name</th><th>Description</th><th>Connect</th></tr>";
+      rows.forEach((x) => {
+        var subrow = x.split(":");
+        console.log(subrow);
+        if (subrow[0] && subrow[0]!="DRAWINGLIST")
+          document.getElementById("connectList").innerHTML +=
+            "<tr><td>" +
+            subrow[1] +
+            "</td><td>" +
+            subrow[2] +
+            "</td><td><input type='button' id='Connect" +
+            subrow[0] +
+            "' value='Connect' onClick='selectDraw(" +
+            subrow[0] +
+            ");'></td></tr>";
+      });
+    }
+    else if (tmpdata[0] == "LOGINSUCCESS"){
+      document.getElementById("loggedinname").innerHTML = document.getElementById(
+        "username"
+      ).value;
+      document.getElementById("needlogin").style.display = "none";
+      document.getElementById("loggedin").style.display = "";
     }
     console.log("Message from server ", event.data);
     document.getElementById("output").innerHTML += event.data + "\n</br>";
@@ -123,53 +151,24 @@ const parseMessage = (msg) => {
 };
 
 async function doLogin() {
-  const result = await sendMessage(
-    socket,
-    "LOGIN;" +
-      document.getElementById("username").value +
-      ";" +
-      document.getElementById("password").value +
-      ";",
-    true
-  );
-  if (result == "success") {
-    document.getElementById("loggedinname").innerHTML = document.getElementById(
-      "username"
-    ).value;
-    document.getElementById("needlogin").style.display = "none";
-    document.getElementById("loggedin").style.display = "";
-  }
-
-  console.log(result);
-  return result;
-}
-async function selectDraw(id) {
-  return await sendMessage(socket, "SELECT;" + id + ";", true);
+  socket.send("LOGIN;"+document.getElementById("username").value+";"+document.getElementById("password").value+";");
 }
 
-async function updateList() {
-  const result = await sendMessage(socket, "LIST;DRAWING;", true);
-  var rows = result.split(";");
-  console.log(rows);
-  document.getElementById("connectList").innerHTML =
-    "<tr><th>Name</th><th>Description</th><th>Connect</th></tr>";
-  rows.forEach((x) => {
-    var subrow = x.split(":");
-    console.log(subrow);
-    if (subrow[0])
-      document.getElementById("connectList").innerHTML +=
-        "<tr><td>" +
-        subrow[1] +
-        "</td><td>" +
-        subrow[2] +
-        "</td><td><input type='button' id='Connect" +
-        subrow[0] +
-        "' value='Connect' onClick='selectDraw(" +
-        subrow[0] +
-        ");'></td></tr>";
-  });
+function createNewDrawing(){
+  socket.send("NEW;DRAWING;TESTI;TESTI;");
+  socket.send("LIST;DRAWING;");
 }
-async function doLogout() {}
+function selectDraw(id) {
+  socket.send("SELECT;" + id + ";");
+}
+//async function selectDraw(id) {
+//  return await sendMessage(socket, "SELECT;" + id + ";", true);
+//}
+
+function updateList() {
+  socket.send("LIST;DRAWING;");
+}
+function doLogout() {}
 window.onload = () => {
   windowAlmostLoad();
 };
