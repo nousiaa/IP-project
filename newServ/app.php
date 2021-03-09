@@ -132,7 +132,7 @@ class WSSocket implements MessageComponentInterface {
                     $query = $conn->prepare('UPDATE data SET command=? WHERE user_id = ? AND id = ?');
                     $query->execute([$comm1[3], $msgsock1[2]["user_id"], $comm1[2]]);
 
-                    $msg = "UNWANTEDUPDATE;".$msgsock1[2]["drawing_id"].";".$comm1[3].";";
+                    $msg = "UUPDATE;".$msgsock1[2]["drawing_id"].";".$comm1[3].";";
                     foreach($clients as $client1){
                         if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]){
                             //var_dump($client1[2]); echo $msg;
@@ -162,7 +162,7 @@ class WSSocket implements MessageComponentInterface {
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $rows = $query->fetchAll();
                     foreach ($rows as $row) {
-                        $from->send("UNWANTEDUPDATE;".$msgsock1[2]["drawing_id"].";".$row["command"].";");
+                        $from->send("UUPDATE;".$msgsock1[2]["drawing_id"].";".$row["command"].";");
                     }
                     break;
                 } else {
