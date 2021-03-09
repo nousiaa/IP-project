@@ -250,7 +250,9 @@ async function windowAlmostLoad() {
 
   // Handle Mouse Coordinates
   function setMouseCoordinates(event) {
-    mouseX = event.clientX - boundings.left;
-    mouseY = event.clientY - boundings.top;
+    let crect = document.getElementById("canvas").getBoundingClientRect();
+
+    mouseX = event.clientX - crect.left;
+    mouseY = event.clientY - crect.top;
   }
 }
