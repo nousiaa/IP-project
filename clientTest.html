@@ -33,8 +33,12 @@
             </div>
          </div>
          <div id = "canvDIV" style="position: relative; width: 640px; height: 400px;">
-            <canvas id="canvas" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
-            <canvas id="canvas1" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+            <canvas id="canvas" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
+            <canvas id="canvas1" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+         </div>
+         <div id="drawcontrols">
+            <input type="button" id="notemode" value="NOTE" onClick="setNoteMode();">
+            <input type="button" id="drawmode" value="DRAW" onClick="setDrawMode();">
          </div>
          <div id="output"></div>
          <div id="control">

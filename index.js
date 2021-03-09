@@ -2,6 +2,11 @@ let data = "test;"; //"LOGIN;test;test"
 var result1string = "";
 var currentTMPid = 0;
 let socket = null;
+var drawmode = 0;
+
+function updateNote(note) {
+  console.log(note);
+}
 
 function connectWS() {
   socket = new WebSocket("wss://n0p0.com/wss2/");
@@ -51,12 +56,46 @@ function connectWS() {
       ).value;
       document.getElementById("needlogin").style.display = "none";
       document.getElementById("loggedin").style.display = "";
+    } else if (tmpdata[0] == "NEWNOTE"){
+
+      const noteID = "note_"+tmpdata[1];
+    
+      let input = document.createElement("input");
+      input.type = "text";
+      input.id=noteID;
+      input.onchange = "updateNote(this);";
+      input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
+      input.style.left = tmpdata[2]+"px";
+      input.style.top = tmpdata[3]+"px";
+      console.log(noteID);
+    
+      document.getElementById("canvDIV").appendChild(input)
     }
+
+
+
+
+
     console.log("Message from server ", event.data);
     document.getElementById("output").innerHTML += event.data + "\n</br>";
   });
 
   defaultMessageListener(socket);
+} {
+
+  const noteID = "note"+aa;
+  aa++;
+
+  let input = document.createElement("input");
+  input.type = "text";
+  input.id=noteID;
+
+  input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
+  input.style.left = +"px";
+  input.style.top = mouseY+"px";
+  console.log(noteID);
+
+  document.getElementById("canvDIV").appendChild(input)
 }
 
 /*
@@ -122,6 +161,17 @@ const receiveMessage = (socket) => {
   return res;
 };
 
+function setNoteMode(){
+  drawmode = 1;
+  document.getElementById('canvas').style.zIndex=0;
+
+};
+function setDrawMode(){
+  drawmode = 0;
+  document.getElementById('canvas').style.zIndex=3;
+};
+
+
 const convert64BaseStringToCoordinates = (str) => {
   parseString = window.atob(str);
   let canvas = document.getElementById("canvas1");
@@ -180,8 +230,10 @@ function sendDataInterval() {
   }
 }
 
+
 async function windowAlmostLoad() {
   let canvas = document.getElementById("canvas");
+  let canvas1 = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
   let boundings = canvas.getBoundingClientRect();
   let resultString = "";
@@ -205,10 +257,19 @@ async function windowAlmostLoad() {
 
   //sendMessage(socket,"LOGIN;test;test;");
   //Start drawing when mouse is clicked down
+  var aa = 0;
+
+  canvas1.addEventListener("mousedown", function (event) {
+    setMouseCoordinates(event,"canvas1");
+    
+    socket.send("NEW;NOTE;"+mouseX+";"+mouseY+";"); 
+
+  });
+
   canvas.addEventListener("mousedown", function (event) {
     socket.send("NEW;DATA;");
     interVARl = setInterval(sendDataInterval, 200);
-    setMouseCoordinates(event);
+    setMouseCoordinates(event,"canvas");
     isDrawing = true;
     xyMatrix = [];
     mouseXmin = mouseX;
@@ -222,42 +283,42 @@ async function windowAlmostLoad() {
 
   // Draw line to x,y when mouse is pressed down
   canvas.addEventListener("mousemove", function (event) {
-    setMouseCoordinates(event);
+      setMouseCoordinates(event,"canvas");
 
-    if (isDrawing) {
-      mouseXmin = mouseXmin > mouseX ? mouseX : mouseXmin;
-      mouseYmin = mouseYmin > mouseY ? mouseY : mouseYmin;
+      if (isDrawing) {
+        mouseXmin = mouseXmin > mouseX ? mouseX : mouseXmin;
+        mouseYmin = mouseYmin > mouseY ? mouseY : mouseYmin;
 
-      mouseXmax = mouseXmax < mouseX ? mouseX : mouseXmax;
-      mouseYmax = mouseYmax < mouseY ? mouseY : mouseYmax;
-      resultString +=
-        String.fromCharCode(mouseX & 255) +
-        String.fromCharCode((mouseX >> 8) & 255) +
-        String.fromCharCode(mouseY & 255) +
-        String.fromCharCode((mouseY >> 8) & 255);
+        mouseXmax = mouseXmax < mouseX ? mouseX : mouseXmax;
+        mouseYmax = mouseYmax < mouseY ? mouseY : mouseYmax;
+        resultString +=
+          String.fromCharCode(mouseX & 255) +
+          String.fromCharCode((mouseX >> 8) & 255) +
+          String.fromCharCode(mouseY & 255) +
+          String.fromCharCode((mouseY >> 8) & 255);
 
-     context.lineTo(mouseX, mouseY);
-     context.stroke();
-      result1string = window.btoa(resultString);
-    }
+      context.lineTo(mouseX, mouseY);
+      context.stroke();
+        result1string = window.btoa(resultString);
+      }
   });
 
   // Stop drawing when mouse button is released
   canvas.addEventListener("mouseup", function (event) {
-    0;
-    setMouseCoordinates(event);
-    clearInterval(interVARl);
-    isDrawing = false;
-    //console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
-    let encodedData = window.btoa(resultString);
-    sendMessage(socket, encodedData);
-    //console.log(encodedData);
-    resultString = "";
+      0;
+      setMouseCoordinates(event,"canvas");
+      clearInterval(interVARl);
+      isDrawing = false;
+      //console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
+      let encodedData = window.btoa(resultString);
+      sendMessage(socket, encodedData);
+      //console.log(encodedData);
+      resultString = "";
   });
 
   // Handle Mouse Coordinates
-  function setMouseCoordinates(event) {
-    let crect = document.getElementById("canvas").getBoundingClientRect();
+  function setMouseCoordinates(event,canv) {
+    let crect = document.getElementById(canv).getBoundingClientRect();
 
     mouseX = event.clientX - crect.left;
     mouseY = event.clientY - crect.top;
