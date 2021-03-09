@@ -105,7 +105,16 @@ class WSSocket implements MessageComponentInterface {
                     $query = $conn->prepare('INSERT INTO drawing (owner_id,name,description,deleted) VALUES (?,?,?,0)');
                     $query->execute([$msgsock1[2]["user_id"], $comm1[2],$comm1[3]]);
                     $id = "DRAWINGID;".$conn->lastInsertId();
-                } else{
+                } else if($comm1[1]=="NOTE"){
+                    if(empty($msgsock1[2]["drawing_id"])){
+                        $msg = "SELECTDRAWINGERROR";
+                        $from->send($msg);
+                        break;
+                    }
+                    $query = $conn->prepare('INSERT INTO data (user_id, drawing_id,deleted) VALUES (?,?,0)');
+                    $query->execute([$msgsock1[2]["user_id"], $msgsock1[2]["drawing_id"]]);
+                    $id = "NEWNOTE;".$conn->lastInsertId().";".$comm1[2].";".$comm1[3].";";
+                } else {
                     $id = "ERROR";
                 }
                 $from->send($id);
