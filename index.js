@@ -4,7 +4,7 @@ var currentTMPid = 0;
 let socket = null;
 
 function connectWS() {
-  socket = new WebSocket("ws://127.0.0.1:8080");
+  socket = new WebSocket("ws://n0p0.com:8080");
   // Connection opened
   socket.addEventListener("open", function (event) {
     document.getElementById("output").innerHTML += "<b>CONNECTED<b></b>\n</br>";
@@ -14,7 +14,7 @@ function connectWS() {
     const tmpdata = event.data.split(";");
     console.log(tmpdata);
     if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
-    else if (tmpdata[0] == "UNWANTEDUPDATE") convert64BaseStringToCoordinates(tmpdata[2])
+    else if (tmpdata[0] == "UUPDATE") convert64BaseStringToCoordinates(tmpdata[2])
     else if (tmpdata[0] == "DRAWINGSELECTED"){
       let canvasc = document.getElementById("canvas")
       let canvascc = canvasc.getContext("2d");
