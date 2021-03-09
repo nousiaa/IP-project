@@ -15,7 +15,15 @@ function connectWS() {
     console.log(tmpdata);
     if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
     if(tmpdata[0] == "UNWANTEDUPDATE") convert64BaseStringToCoordinates(tmpdata[2])
-
+    if(tmpdata[0] == "DRAWINGSELECTED"){
+      let canvasc = document.getElementById("canvas")
+      let canvascc = canvasc.getContext("2d");
+      let canvasc1 = document.getElementById("canvas1")
+      let canvascc1 = canvasc1.getContext("2d");
+      canvascc.clearRect(0, 0, canvasc.width, canvasc.height);
+      canvascc1.clearRect(0, 0, canvasc1.width, canvasc1.height);
+      socket.send("SEND;DATA;");
+    }
     console.log("Message from server ", event.data);
     document.getElementById("output").innerHTML += event.data + "\n</br>";
   });

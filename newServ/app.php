@@ -15,7 +15,7 @@ use Ratchet\WebSocket\WsServer;
 
 
 
-$port = 10000;
+$port = 8080;
 
 class WSSocket implements MessageComponentInterface {
 
@@ -116,13 +116,11 @@ class WSSocket implements MessageComponentInterface {
 
             case "SELECT":
                 if(empty($msgsock1[2]["user_id"])){
-                    $msg = "AUTHERROR";
-                    $from->send($msg);
+                    $from->send("AUTHERROR");
                     break;
                 }
                 $msgsock1[2]["drawing_id"]=$comm1[1];
-                $msg = "OK";
-                $from->send($msg);
+                $from->send("DRAWINGSELECTED");
                 break;   
             case "UPDATE":
                 if(empty($msgsock1[2]["user_id"])){
@@ -154,6 +152,26 @@ class WSSocket implements MessageComponentInterface {
                 }
                 $from->send($msg);
                 break;
+
+            case "SEND":
+                if(empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))){
+                    $from->send("AUTHERROR");
+                    break;
+                }
+
+                if ($comm1[1]=="DATA") {
+                    $query = $conn->prepare('SELECT * FROM data where drawing_id =?');
+                    $query->execute([$msgsock1[2]["drawing_id"]]);
+                    $rows = $query->fetchAll();
+                    foreach ($rows as $row) {
+                        $from->send("UNWANTEDUPDATE;".$msgsock1[2]["drawing_id"].";".$row["command"].";");
+                    }
+                    break;
+                } else {
+                    $from->send("ERROR");
+                }
+                break;
+
             case "LIST":
                 if(empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))){
                     $msg = "AUTHERROR";
