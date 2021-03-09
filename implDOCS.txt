@@ -1,0 +1,75 @@
+Some protocol documentation:
+
+
+Server PHP
+Client JavaScript
+protocol works via following layering:
+tcp->websocket->server layer->draw command layer
+
+
+
+
+Commands:
+
+
+
+Client -> Server:
+
+LOGIN;<username>;<password>
+
+*do login with credentials
+
+
+LOGOUT;
+
+*do logout
+
+
+
+NEW;DATA|DRAWING;
+
+*for drawing parameters are name;description;
+
+*for data, no parameters needed, returns id
+
+
+
+SELECT;<id>;
+
+*select drawing with id as active
+
+
+
+
+UPDATE;DATA|DRAWING;
+
+*for data parameters are id;drawcommand;
+
+*issues given update as UUPDATE command to other clients when sent to server
+*for drawing parameters are -----
+for data updates, data is constantly resent as a whole
+after data update, given data is also sent to all connected clients
+
+
+
+SEND;DATA; 
+*resend all parts of the selected drawing
+*server returns data as UUPDATE commands
+
+
+
+Server->Client:
+
+UUPDATE;<drawingid>;<command>;
+*data that needs to be drawn
+
+LOGINSUCCESS
+*login was successful
+
+
+DATAID;<id>;
+*server assigned client an new data id
+
+
+DRAWINGSELECTED;
+*server acknowledges that drawing selection was successful

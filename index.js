@@ -4,7 +4,7 @@ var currentTMPid = 0;
 let socket = null;
 
 function connectWS() {
-  socket = new WebSocket("ws://n0p0.com:8080");
+  socket = new WebSocket("wss://n0p0.com/wss2/");
   // Connection opened
   socket.addEventListener("open", function (event) {
     document.getElementById("output").innerHTML += "<b>CONNECTED<b></b>\n</br>";
