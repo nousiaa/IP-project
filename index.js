@@ -1,5 +1,5 @@
 let data = "test;"; //"LOGIN;test;test"
-var result1string ="";
+var result1string = "";
 var currentTMPid = 0;
 let socket = null;
 
@@ -11,16 +11,15 @@ function connectWS() {
     document.getElementById("connect").disabled = true;
   });
   socket.addEventListener("message", function (event) {
-
     const tmpdata = event.data.split(";");
     console.log(tmpdata);
-    if(tmpdata[0]=="DATAID") currentTMPid=tmpdata[1];
-  
+    if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
+    if(tmpdata[0] == "UNWANTEDUPDATE") convert64BaseStringToCoordinates(tmpdata[2])
+
     console.log("Message from server ", event.data);
     document.getElementById("output").innerHTML += event.data + "\n</br>";
   });
-  
-  
+
   defaultMessageListener(socket);
 }
 
@@ -70,17 +69,10 @@ const sendMessage = async (socket, msg, callback) => {
   }
 };
 
-
-
-
-
 //TODO: Add default behaviour, such as parsing message.
 const defaultMessageListener = (socket) => {
   socket.onmessage = null;
-  socket.onmessage = (event) => {
-
-
-  };
+  socket.onmessage = (event) => {};
 };
 
 const receiveMessage = (socket) => {
@@ -174,12 +166,11 @@ window.onload = () => {
   windowAlmostLoad();
 };
 
-function sendDataInterval(){
-  console.log("UPDATE;DATA;"+currentTMPid+";"+result1string);
-  if(currentTMPid){
-    socket.send("UPDATE;DATA;"+currentTMPid+";"+result1string);
+function sendDataInterval() {
+  console.log("UPDATE;DATA;" + currentTMPid + ";" + result1string);
+  if (currentTMPid) {
+    socket.send("UPDATE;DATA;" + currentTMPid + ";" + result1string);
   }
-  
 }
 
 async function windowAlmostLoad() {
@@ -191,7 +182,6 @@ async function windowAlmostLoad() {
   let mouseXmin = 0;
   let mouseYmin = 0;
   let interVARl = 0;
-
 
   let mouseXmax = 0;
   let mouseYmax = 0;
@@ -209,7 +199,6 @@ async function windowAlmostLoad() {
   //sendMessage(socket,"LOGIN;test;test;");
   //Start drawing when mouse is clicked down
   canvas.addEventListener("mousedown", function (event) {
-
     socket.send("NEW;DATA;");
     interVARl = setInterval(sendDataInterval, 1000);
     setMouseCoordinates(event);
@@ -247,7 +236,8 @@ async function windowAlmostLoad() {
   });
 
   // Stop drawing when mouse button is released
-  canvas.addEventListener("mouseup", function (event) {0
+  canvas.addEventListener("mouseup", function (event) {
+    0;
     setMouseCoordinates(event);
     clearInterval(interVARl);
     isDrawing = false;
