@@ -63,7 +63,7 @@ function connectWS() {
       let input = document.createElement("input");
       input.type = "text";
       input.id=noteID;
-      input.onchange = "updateNote(this);";
+      input.onchange = function(){updateNote(this.id, this.value);};
       input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
       input.style.left = tmpdata[2]+"px";
       input.style.top = tmpdata[3]+"px";
