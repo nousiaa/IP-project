@@ -15,7 +15,7 @@ use Ratchet\WebSocket\WsServer;
 
 
 
-$port = 8080;
+$port = 10000;
 
 class WSSocket implements MessageComponentInterface {
 
