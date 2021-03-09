@@ -4,7 +4,7 @@ var currentTMPid = 0;
 let socket = null;
 
 function connectWS() {
-  socket = new WebSocket("ws://127.0.0.1:10000");
+  socket = new WebSocket("ws://n0p0.com:8080");
   // Connection opened
   socket.addEventListener("open", function (event) {
     document.getElementById("output").innerHTML += "<b>CONNECTED<b></b>\n</br>";
@@ -88,7 +88,7 @@ const receiveMessage = (socket) => {
 
 const convert64BaseStringToCoordinates = (str) => {
   parseString = window.atob(str);
-  let canvas = document.getElementById("canvas");
+  let canvas = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
   let startX = parseString.charCodeAt(0) + (parseString.charCodeAt(1) << 8);
   let startY = parseString.charCodeAt(2) + (parseString.charCodeAt(3) << 8);
@@ -200,7 +200,7 @@ async function windowAlmostLoad() {
   //Start drawing when mouse is clicked down
   canvas.addEventListener("mousedown", function (event) {
     socket.send("NEW;DATA;");
-    interVARl = setInterval(sendDataInterval, 1000);
+    interVARl = setInterval(sendDataInterval, 200);
     setMouseCoordinates(event);
     isDrawing = true;
     xyMatrix = [];
@@ -229,8 +229,8 @@ async function windowAlmostLoad() {
         String.fromCharCode(mouseY & 255) +
         String.fromCharCode((mouseY >> 8) & 255);
 
-      context.lineTo(mouseX, mouseY);
-      context.stroke();
+     context.lineTo(mouseX, mouseY);
+     context.stroke();
       result1string = window.btoa(resultString);
     }
   });
