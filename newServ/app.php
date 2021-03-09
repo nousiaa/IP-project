@@ -143,9 +143,9 @@ class WSSocket implements MessageComponentInterface {
 
                     $msg = "UUPDATE;".$msgsock1[2]["drawing_id"].";".$comm1[3].";";
                     foreach($clients as $client1){
-                        if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]){
+                        if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId){
                             //var_dump($client1[2]); echo $msg;
-                            $client1[0]->send( $msg);
+                            $client1[0]->send($msg);
                         }
 
                     }
