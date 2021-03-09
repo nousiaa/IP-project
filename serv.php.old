@@ -6,11 +6,11 @@
  * send data to websocket TODO: add support for mask
  */
 function send($client,$msg){
-    echo $msg;
+    //echo $msg;
     $mlen = strlen($msg);
-    echo $mlen;
+    //echo $mlen;
     $mlenresult = chr($mlen);
-    echo $mlenresult;
+    //echo $mlenresult;
     if ($mlen > 65536) {
         $mlenresult = chr(127).substr(pack('J', $mlen),0);
     } else if($mlen>127 ) {
@@ -109,24 +109,26 @@ while (true){
         $msg = "";
 
         // try to get data from client
-        if(false === ($comm = socket_read($msgsock, 2048, PHP_BINARY_READ))){
+        if(false === ($comm = socket_read($msgsock, 1112048, PHP_BINARY_READ))){
             if(socket_last_error() != 10035){
                 socket_close($msgsock);
                 $msgsock1[1]=1;
             }
 
         }
-
+        //if(strlen($comm)!=0)echo "SIZE:".strlen($comm);
         // parse data from client
         $comm = convert($comm);
         $comm = trim($comm);
         $comm1 = explode(";", $comm);
 
+        if(!empty($comm))echo "SIZE: ".strlen($comm)."\n";
+        //if(strlen($comm)!=0)echo "SIZE1:".strlen($comm);
         // handle the command
         switch ($comm1[0]){
             case "test":
                 $msg = "";
-                for($i =0; $i<200;$i++){
+                for($i =0; $i<2000;$i++){
                     $msg .= "test".$i;
                 }
                 
@@ -207,7 +209,7 @@ while (true){
                     $msg = "UNWANTEDUPDATE;".$msgsock1[2]["drawing_id"].";".$comm1[3].";";
                     foreach($clients as $client1){
                         if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]){
-                            var_dump($client1[2]); echo $msg;
+                            //var_dump($client1[2]); echo $msg;
                             send($client1[0], $msg);
                         }
 
