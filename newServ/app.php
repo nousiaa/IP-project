@@ -76,14 +76,12 @@ class WSSocket implements MessageComponentInterface {
                 $query = $conn->prepare('SELECT * FROM user where username=?');
                 $query->execute([$comm1[1]]);
                 $row = $query->fetch();
-                $token = "ERROR";
+                $token = "LOGINERROR";
                 if(password_verify ($comm1[2], $row["password"])){
-                    //$token = bin2hex(random_bytes(8));
-                    //$tokenTable[$token]=$row["id"];
-                    $token="success";
+
+                    $token="LOGINSUCCESS";
                     $msgsock1[2]["user_id"]=$row["id"];
                 }
-
                 $from->send($token);
                 break;
             case "NEW":
@@ -206,7 +204,7 @@ class WSSocket implements MessageComponentInterface {
                     $query = $conn->prepare('SELECT * FROM drawing');
                     $query->execute([]);
                     $rows = $query->fetchAll();
-                    $msg = "";
+                    $msg = "DRAWINGLIST;";
                     foreach($rows as $row){
                         $msg .= $row["id"].":".$row["name"].":".$row["description"].";";
                     }
