@@ -81,22 +81,7 @@ function connectWS() {
   });
 
   defaultMessageListener(socket);
-} {
-
-  const noteID = "note"+aa;
-  aa++;
-
-  let input = document.createElement("input");
-  input.type = "text";
-  input.id=noteID;
-
-  input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
-  input.style.left = +"px";
-  input.style.top = mouseY+"px";
-  console.log(noteID);
-
-  document.getElementById("canvDIV").appendChild(input)
-}
+} 
 
 /*
  *Waits for connection to be established, terminates if connection doesn't work after x number times.
@@ -257,7 +242,6 @@ async function windowAlmostLoad() {
 
   //sendMessage(socket,"LOGIN;test;test;");
   //Start drawing when mouse is clicked down
-  var aa = 0;
 
   canvas1.addEventListener("mousedown", function (event) {
     setMouseCoordinates(event,"canvas1");
@@ -305,7 +289,6 @@ async function windowAlmostLoad() {
 
   // Stop drawing when mouse button is released
   canvas.addEventListener("mouseup", function (event) {
-      0;
       setMouseCoordinates(event,"canvas");
       clearInterval(interVARl);
       isDrawing = false;
