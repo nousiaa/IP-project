@@ -4,8 +4,13 @@ var currentTMPid = 0;
 let socket = null;
 var drawmode = 0;
 
-function updateNote(note) {
+function updateNote(noteid,notedata) {
   console.log(note);
+  const nid = noteid.split("_")
+  if (nid[1]) {
+    
+    socket.send("UPDATE;DATA;" + nid[1] + ";NOTE;"+ atob(notedata));
+  }
 }
 
 function connectWS() {
@@ -19,7 +24,11 @@ function connectWS() {
     const tmpdata = event.data.split(";");
     console.log(tmpdata);
     if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
-    else if (tmpdata[0] == "UUPDATE") convert64BaseStringToCoordinates(tmpdata[2])
+    else if (tmpdata[0] == "UUPDATE") {
+      if (tmpdata[2] == "DATA")convert64BaseStringToCoordinates(tmpdata[3]);
+      else if (tmpdata[2] == "NOTE")convert64BaseStringToNote(tmpdata[3]);
+      
+    }
     else if (tmpdata[0] == "DRAWINGSELECTED"){
       let canvasc = document.getElementById("canvas")
       let canvascc = canvasc.getContext("2d");
@@ -63,7 +72,7 @@ function connectWS() {
       let input = document.createElement("input");
       input.type = "text";
       input.id=noteID;
-      input.onchange = function(){updateNote(this.id, this.value);};
+      input.oninput = function(){updateNote(this.id, this.value);};
       input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
       input.style.left = tmpdata[2]+"px";
       input.style.top = tmpdata[3]+"px";
@@ -156,7 +165,12 @@ function setDrawMode(){
   document.getElementById('canvas').style.zIndex=3;
 };
 
+const convert64BaseStringToNote = (str) => {
 
+  console.log("data:"+str);
+
+
+};
 const convert64BaseStringToCoordinates = (str) => {
   parseString = window.atob(str);
   let canvas = document.getElementById("canvas1");
@@ -283,7 +297,7 @@ async function windowAlmostLoad() {
 
       context.lineTo(mouseX, mouseY);
       context.stroke();
-        result1string = window.btoa(resultString);
+        result1string = "DATA;"+window.btoa(resultString);
       }
   });
 
@@ -293,8 +307,10 @@ async function windowAlmostLoad() {
       clearInterval(interVARl);
       isDrawing = false;
       //console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
-      let encodedData = window.btoa(resultString);
-      sendMessage(socket, encodedData);
+      
+      result1string = "DATA;"+window.btoa(resultString);
+      sendDataInterval();
+
       //console.log(encodedData);
       resultString = "";
   });
