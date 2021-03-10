@@ -4,12 +4,11 @@ var currentTMPid = 0;
 let socket = null;
 var drawmode = 0;
 
-function updateNote(noteid,notedata,x,y) {
-
+function updateNote(noteid,notedata,x,y,sx,sy) {
   const nid = noteid.split("_")
   if (nid[1]) {
     
-    socket.send("UPDATE;DATA;" + nid[1] + ";NOTE:"+ btoa(noteid+":"+x+":"+y+":"+notedata));
+    socket.send("UPDATE;DATA;" + nid[1] + ";NOTE:"+ btoa(noteid+":"+x+":"+y+":"+sx+":"+sy+":"+notedata));
   }
 }
 
@@ -85,19 +84,21 @@ function connectWS() {
 
   defaultMessageListener(socket);
 } 
-function createNote(noteID,x,y,tvalue){
+function createNote(noteID,x,y,tvalue,sx="30px",sy="20px"){
   const existingnote = document.getElementById(noteID);
 
   if(existingnote){
     existingnote.value=tvalue;
   } else {
-    let input = document.createElement("input");
+    let input = document.createElement("textarea");
     input.type = "text";
     input.id=noteID;
-    input.oninput = function(){updateNote(this.id, this.value,x,y);};
+    input.oninput = function(){updateNote(this.id, this.value,input.style.left,input.style.top,this.style.width,this.style.height);};
     input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
-    input.style.left = x+"px";
-    input.style.top = y+"px";
+    input.style.left = x;
+    input.style.top = y;
+    input.style.width = sx;
+    input.style.height = sy;
     input.value=tvalue;
     input.classList.add("drawNote");
     console.log(noteID);
@@ -183,7 +184,7 @@ function setDrawMode(){
 const convert64BaseStringToNote = (str) => {
   const note = atob(str).split(":");
   console.log(note);
-  createNote(note[0],note[1],note[2],note[3]);
+  createNote(note[0],note[1],note[2],note[5],note[3],note[4]);
 };
 const convert64BaseStringToCoordinates = (str) => {
   parseString = window.atob(str);
@@ -218,7 +219,7 @@ async function doLogin() {
 }
 
 function createNewDrawing(){
-  socket.send("NEW;DRAWING;TESTI;TESTI;");
+  socket.send("NEW;DRAWING;TESTI1;TESTI1;");
   socket.send("LIST;DRAWING;");
 }
 function selectDraw(id) {
@@ -274,7 +275,7 @@ async function windowAlmostLoad() {
   canvas1.addEventListener("mousedown", function (event) {
     setMouseCoordinates(event,"canvas1");
     
-    socket.send("NEW;NOTE;"+mouseX+";"+mouseY+";"); 
+    socket.send("NEW;NOTE;"+mouseX+"px;"+mouseY+"px;"); 
 
   });
 
