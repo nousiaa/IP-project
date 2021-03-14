@@ -340,8 +340,16 @@ async function windowAlmostLoad() {
       isDrawing = false;
       //console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
       drawPrefix = "DATA:";
-      if(drawmode==2)drawPrefix ="ERASE:";
-      result1string = drawPrefix+window.btoa(resultString);
+      let b64str = window.btoa(resultString)
+      if(drawmode==2){
+        drawPrefix ="ERASE:";
+        convert64BaseStringToCoordinates(b64str,true);
+      } else {
+        convert64BaseStringToCoordinates(b64str,false);
+      }
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      result1string = drawPrefix+b64str;
+
       sendDataInterval();
 
       //console.log(encodedData);
