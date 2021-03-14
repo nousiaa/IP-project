@@ -21,7 +21,7 @@ function connectWS() {
   });
   socket.addEventListener("message", function (event) {
     const tmpdata = event.data.split(";");
-    console.log(tmpdata);
+   // console.log(tmpdata);
     if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
     else if (tmpdata[0] == "UUPDATE") {
       const tmpdata1 = tmpdata[2].split(":");
@@ -44,12 +44,12 @@ function connectWS() {
     }
     else if (tmpdata[0] == "DRAWINGLIST"){
       let rows = tmpdata;
-      console.log(rows);
+     // console.log(rows);
       document.getElementById("connectList").innerHTML =
         "<tr><th>Name</th><th>Description</th><th>Connect</th></tr>";
       rows.forEach((x) => {
         var subrow = x.split(":");
-        console.log(subrow);
+      //  console.log(subrow);
         if (subrow[0] && subrow[0]!="DRAWINGLIST")
           document.getElementById("connectList").innerHTML +=
             "<tr><td>" +
@@ -78,8 +78,8 @@ function connectWS() {
 
 
 
-    console.log("Message from server ", event.data);
-    document.getElementById("output").innerHTML += event.data + "\n</br>";
+    //console.log("Message from server ", event.data);
+    //document.getElementById("output").innerHTML += event.data + "\n</br>";
   });
 
   defaultMessageListener(socket);
@@ -107,7 +107,7 @@ function createNote(noteID,x,y,tvalue,sx="30px",sy="20px"){
     input.style.height = sy;
     input.value=tvalue;
     input.classList.add("drawNote");
-    console.log(noteID);
+    //console.log(noteID);
   
     document.getElementById("canvDIV").appendChild(input)
   }
@@ -138,8 +138,8 @@ const waitConnection = (socket) => {
 };
 
 const sendMessage = async (socket, msg, callback) => {
-  document.getElementById("output").innerHTML +=
-    "<b>" + msg + ":<b></b>\n</br>";
+  //document.getElementById("output").innerHTML +=
+  //  "<b>" + msg + ":<b></b>\n</br>";
   if (socket.readystate !== socket.OPEN) {
     try {
       await waitConnection(socket);
@@ -192,7 +192,7 @@ function setEraseMode(){
 }
 const convert64BaseStringToNote = (str) => {
   const note = atob(str).split(":");
-  console.log(note);
+  //console.log(note);
   createNote(note[0],note[1],note[2],note[5],note[3],note[4]);
 };
 const convert64BaseStringToCoordinates = (str,eraseMode=false) => {
@@ -222,7 +222,7 @@ const convert64BaseStringToCoordinates = (str,eraseMode=false) => {
 
 const parseMessage = (msg) => {
   const splittedString = msg.split(";");
-  console.log(splittedString);
+  //console.log(splittedString);
 };
 
 async function doLogin() {
