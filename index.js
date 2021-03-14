@@ -25,9 +25,9 @@ function connectWS() {
     if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
     else if (tmpdata[0] == "UUPDATE") {
       const tmpdata1 = tmpdata[2].split(":");
-      if (tmpdata1[0] == "DATA")convert64BaseStringToCoordinates(tmpdata1[1]);
+      if (tmpdata1[0] == "DATA")convert64BaseStringToCoordinates(tmpdata1[1],false);
       else if (tmpdata1[0] == "NOTE")convert64BaseStringToNote(tmpdata1[1]);
-      
+      else if (tmpdata1[0] == "ERASE")convert64BaseStringToCoordinates(tmpdata1[1],true);
     }
     else if (tmpdata[0] == "DRAWINGSELECTED"){
       let canvasc = document.getElementById("canvas")
@@ -180,13 +180,16 @@ function setDrawMode(){
   drawmode = 0;
   document.getElementById('canvas').style.zIndex=3;
 };
-
+function setEraseMode(){
+  drawmode = 2;
+  document.getElementById('canvas').style.zIndex=3;
+}
 const convert64BaseStringToNote = (str) => {
   const note = atob(str).split(":");
   console.log(note);
   createNote(note[0],note[1],note[2],note[5],note[3],note[4]);
 };
-const convert64BaseStringToCoordinates = (str) => {
+const convert64BaseStringToCoordinates = (str,eraseMode=false) => {
   parseString = window.atob(str);
   let canvas = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
@@ -194,6 +197,8 @@ const convert64BaseStringToCoordinates = (str) => {
   let startY = parseString.charCodeAt(2) + (parseString.charCodeAt(3) << 8);
   //console.log(startX);
   //console.log(startY);
+  if(eraseMode) context.globalCompositeOperation = 'destination-out';
+  else context.globalCompositeOperation = 'source-over';
   context.beginPath();
   context.moveTo(startX, startY);
   for (i = 4; i < parseString.length; i += 4) {
@@ -309,10 +314,13 @@ async function windowAlmostLoad() {
           String.fromCharCode((mouseX >> 8) & 255) +
           String.fromCharCode(mouseY & 255) +
           String.fromCharCode((mouseY >> 8) & 255);
-
+      if(drawmode==2) context.globalCompositeOperation = 'destination-out';
+      else context.globalCompositeOperation = 'source-over';
       context.lineTo(mouseX, mouseY);
       context.stroke();
-        result1string = "DATA:"+window.btoa(resultString);
+      drawPrefix = "DATA:";
+      if(drawmode==2)drawPrefix ="ERASE:";
+      result1string = drawPrefix+window.btoa(resultString);
       }
   });
 
@@ -322,8 +330,9 @@ async function windowAlmostLoad() {
       clearInterval(interVARl);
       isDrawing = false;
       //console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
-      
-      result1string = "DATA:"+window.btoa(resultString);
+      drawPrefix = "DATA:";
+      if(drawmode==2)drawPrefix ="ERASE:";
+      result1string = drawPrefix+window.btoa(resultString);
       sendDataInterval();
 
       //console.log(encodedData);
