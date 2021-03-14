@@ -88,13 +88,19 @@ function createNote(noteID,x,y,tvalue,sx="30px",sy="20px"){
   const existingnote = document.getElementById(noteID);
 
   if(existingnote){
+    existingnote.style.left = x;
+    existingnote.style.top = y;
+    existingnote.style.width = sx;
+    existingnote.style.height = sy;
     existingnote.value=tvalue;
+
   } else {
     let input = document.createElement("textarea");
     input.type = "text";
     input.id=noteID;
     input.oninput = function(){updateNote(this.id, this.value,input.style.left,input.style.top,this.style.width,this.style.height);};
-    input.style="position: absolute; z-index: 2; left: 0; top: 0; border: none; background-color: rgba(0,0,0,0.1);"
+    input.classList.add("drawNote");
+    input.style="display:block; position: absolute; z-index: 2; border: none; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7);"
     input.style.left = x;
     input.style.top = y;
     input.style.width = sx;
@@ -254,9 +260,7 @@ async function windowAlmostLoad() {
   let canvas = document.getElementById("canvas");
   let canvas1 = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
-  let boundings = canvas.getBoundingClientRect();
   let resultString = "";
-  let xyMatrix = [];
   let mouseXmin = 0;
   let mouseYmin = 0;
   let interVARl = 0;
@@ -289,7 +293,6 @@ async function windowAlmostLoad() {
     interVARl = setInterval(sendDataInterval, 200);
     setMouseCoordinates(event,"canvas");
     isDrawing = true;
-    xyMatrix = [];
     mouseXmin = mouseX;
     mouseXmax = mouseX;
     mouseYmin = mouseY;
