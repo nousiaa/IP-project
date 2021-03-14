@@ -322,8 +322,14 @@ async function windowAlmostLoad() {
       context.lineTo(mouseX, mouseY);
       context.stroke();
       drawPrefix = "DATA:";
-      if(drawmode==2)drawPrefix ="ERASE:";
-      result1string = drawPrefix+window.btoa(resultString);
+      let b64str = window.btoa(resultString)
+      if(drawmode==2){
+        drawPrefix ="ERASE:";
+        convert64BaseStringToCoordinates(b64str,true);
+      } else {
+        convert64BaseStringToCoordinates(b64str,false);
+      }
+      result1string = drawPrefix+b64str;
       }
   });
 

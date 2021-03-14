@@ -159,7 +159,25 @@ class WSSocket implements MessageComponentInterface {
                 }
                 $from->send($msg);
                 break;
+            case "UNDO":
+                if(empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))){
+                    $from->send("AUTHERROR");
+                    break;
+                }
+                if ($comm1[1]=="DATA") {
+                    $query = $conn->prepare('SELECT  max(id) FROM data where drawing_id =? AND deleted<>1');
+                    $query->execute([$msgsock1[2]["drawing_id"]]);
+                    $rows = $query->fetchAll();
+                    var_dump($row);
+                    foreach ($rows as $row) {
+                        //$from->send("UUPDATE;".$msgsock1[2]["drawing_id"].";".$row["command"].";");
+                    }
+                    break;
+                } else {
+                    $from->send("ERROR");
+                }
 
+                break;
             case "SEND":
                 if(empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))){
                     $from->send("AUTHERROR");
@@ -167,7 +185,7 @@ class WSSocket implements MessageComponentInterface {
                 }
 
                 if ($comm1[1]=="DATA") {
-                    $query = $conn->prepare('SELECT * FROM data where drawing_id =?');
+                    $query = $conn->prepare('SELECT * FROM data where drawing_id =? AND deleted<>1');
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $rows = $query->fetchAll();
                     foreach ($rows as $row) {
