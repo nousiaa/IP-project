@@ -53,6 +53,11 @@ function clearScreen(retaindata = false) {
   canvascc.clearRect(0, 0, canvasc.width, canvasc.height);
   canvascc1.clearRect(0, 0, canvasc1.width, canvasc1.height);
   let itm = document.getElementsByClassName("drawNote");
+  let divs = document.getElementsByClassName("drawNoteDiv");
+  while (divs.length > 0) {
+    divs[0].parentNode.removeChild(divs[0]);
+  }
+  
   while (itm.length > 0) {
     itm[0].parentNode.removeChild(itm[0]);
   }
@@ -171,8 +176,8 @@ function uploadImage(e) {
 
 function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   const divID = noteID + "div"
+  const existingDiv = document.getElementById(divID);
   const existingnote = document.getElementById(noteID);
-  const existingDiv = document.getElementById(divID)
 
   if (existingnote && existingDiv) {
     console.log("WTF!")
@@ -217,7 +222,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
         div.style.height
       );
     };
-    input.classList.add("drawNote");
+    div.classList.add("drawNoteDiv");
     input.style = "display:block; position: relative; z-index: 2; width: 100%; height: 100%; border: none; resize: none; background-color: rgba(255,255,204,0.1);";
     input.style.left = 0;
     input.style.top = 0;
