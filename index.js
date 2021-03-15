@@ -139,6 +139,13 @@ function connectWS() {
         document.getElementById("loggedin").style.display = "none";
         clearScreen();
         break;
+      case "ASKJOIN":
+        if(confirm("Allow user "+tmpdata[1]+" to join this drawing?")){
+          socket.send("ALLOWJOIN;"+tmpdata[0]+";");
+        } else {
+          socket.send("DISALLOWJOIN;"+tmpdata[0]+";");
+        }
+        break;
     }
     //if (tmpdata[0] == "DATAID") {
     //  currentTMPid = tmpdata[1];

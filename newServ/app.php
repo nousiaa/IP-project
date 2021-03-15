@@ -67,10 +67,14 @@ class WSSocket implements MessageComponentInterface {
                 $query->execute([$comm1[1]]);
                 $row = $query->fetch();
 
+                $query = $conn->prepare('SELECT * FROM users where id=?');
+                $query->execute([$msgsock1[2]["user_id"]]);
+                $row = $query->fetch();
+
                 foreach($clients as $client1){
                     if($client1[2]["drawing_id"]==$comm1[1] && $client1[0]->resourceId!=$from->resourceId && $row["owner_id"]==$client1[2]["user_id"]){
                         //var_dump($client1[2]); echo $msg;
-                        $client1[0]->send("ASKJOIN;".$msgsock1[2]["user_id"].";");
+                        $client1[0]->send("ASKJOIN;".$msgsock1[2]["user_id"].";".$row["username"].";");
                     }
 
                 }
