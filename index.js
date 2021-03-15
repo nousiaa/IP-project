@@ -229,7 +229,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   const existingnote = document.getElementById(noteID);
   const existingDiv = document.getElementById(divID)
 
-  if (existingnote && existingDiv) {
+  if (existingnote) {
     
     existingDiv.style.left = x;
     existingDiv.style.top = y;
@@ -243,11 +243,13 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     existingnote.style.height = sy;
     existingnote.value = tvalue;
   } else {
-    let div = document.createElement("div-textarea");
+    let div = document.createElement("div");
     let input = document.createElement("textarea");
 
 
     div.appendChild(input)
+    
+    //div.addEventListener("mousedown", dragElement)
 
 
     div.style = "position: absolute;"
@@ -283,6 +285,9 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     document.getElementById("canvDIV").appendChild(div);
   }
 }
+
+//function dragElement(element)
+
 
 
 /*
