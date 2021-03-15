@@ -225,11 +225,20 @@ function uploadImage(e) {
 }
 
 function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
+  const divID = noteID + "div"
   const existingnote = document.getElementById(noteID);
+  const existingDiv = document.getElementById(divID)
 
-  if (existingnote) {
-    existingnote.style.left = x;
-    existingnote.style.top = y;
+  if (existingnote && existingDiv) {
+    
+    existingDiv.style.left = x;
+    existingDiv.style.top = y;
+    existingDiv.style.width = sx;
+    existingDiv.style.height =sy;
+
+
+    existingnote.style.left = 0;
+    existingnote.style.top = 0;
     existingnote.style.width = sx;
     existingnote.style.height = sy;
     existingnote.value = tvalue;
@@ -240,8 +249,13 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
 
     div.appendChild(input)
 
-    div.
 
+    div.style = "position: absolute;"
+    div.id = divID
+    div.style.left = x;
+    div.style.top = y;
+    div.style.width = sx;
+    div.style.height =sy;
 
     input.type = "text";
     input.id = noteID;
@@ -257,9 +271,9 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     };
     input.classList.add("drawNote");
     input.style =
-      "display:block; position: absolute; z-index: 2; border: none; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7);";
-    input.style.left = x;
-    input.style.top = y;
+      "display:block; position: relative; z-index: 2; border: none; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7);";
+    input.style.left = 0;
+    input.style.top = 0;
     input.style.width = sx;
     input.style.height = sy;
     input.value = tvalue;
@@ -270,21 +284,6 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   }
 }
 
-const dragElement = (elem) => {
-  let pos1 =0, pos2 = 0, pos3 = 0, pos4 = 0;
-  elem.onmousedown = handleDragStart;
-
-  const handleDragStart = (event) => {
-
-  } 
-  const handleDrag = (event) => {
-
-  }
-
-  const handleDragEnd = (event) => {
-
-  }
-}
 
 /*
  *Waits for connection to be established, terminates if connection doesn't work after x number times.
