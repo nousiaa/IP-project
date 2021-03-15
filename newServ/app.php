@@ -56,29 +56,28 @@ class WSSocket implements MessageComponentInterface {
 
         // handle the command
         switch ($comm1[0]){
-            case "JOIN":
+             case "DISALLOWJOIN":
                 if(empty($msgsock1[2]["user_id"])){
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
                 }
-
                 $query = $conn->prepare('SELECT * FROM drawing where id=?');
-                $query->execute([$comm1[1]]);
+                $query->execute([$msgsock1[2]["drawing_id"]]);
                 $row = $query->fetch();
+                
 
-                $query = $conn->prepare('SELECT * FROM users where id=?');
-                $query->execute([$msgsock1[2]["user_id"]]);
-                $row1 = $query->fetch();
-
-                foreach($clients as $client1){
-                    if($client1[2]["drawing_id"]==$comm1[1] && $client1[0]->resourceId!=$from->resourceId && $row["owner_id"]==$client1[2]["user_id"]){
-                        //var_dump($client1[2]); echo $msg;
-                        $client1[0]->send("ASKJOIN;".$msgsock1[2]["user_id"].";".$row1["username"].";");
-                    }
-
+                if($msgsock1[2]["user_id"] != $row["owner_id"]){
+                    $msg = "AUTHERROR";
+                    $from->send($msg);
+                    break;
                 }
-                $from->send("WAITJOIN");
+                foreach($clients as $client1){
+                    if($client1[2]["user_id"]==$comm1[1]){
+                        $client1[0]->send("DISALLOWJ;".$msgsock1[2]["drawing_id"].";");
+                    }
+                }
+                $from->send("OK");
                 break;
             case "ALLOWJOIN":
                 if(empty($msgsock1[2]["user_id"])){
@@ -100,6 +99,14 @@ class WSSocket implements MessageComponentInterface {
 
                 $query = $conn->prepare('INSERT INTO allowed_users (drawing_id, user_id, deleted) VALUES (?,?,0)');
                 $query->execute([$msgsock1[2]["drawing_id"], $comm1[1]]);
+
+                foreach($clients as $client1){
+                    if($client1[2]["user_id"]==$comm1[1]){
+                        $client1[0]->send("ALLOWJ;".$msgsock1[2]["drawing_id"].";");
+                    }
+                }
+                $from->send("OK");
+
                 break;
 
             case "LOGOUT":
@@ -164,10 +171,36 @@ class WSSocket implements MessageComponentInterface {
                 $query = $conn->prepare('SELECT count(*) from allowed_users WHERE drawing_id=? AND user_id=? AND deleted<>1');
                 $query->execute([$comm1[1], $msgsock1[2]["user_id"]]);
                 $row = $query->fetch();
-                if(empty($msgsock1[2]["user_id"])||$row["count(*)"]==0){
-                    $from->send("AUTHERROR");
+
+
+                if(empty($msgsock1[2]["user_id"])){
+                    $msg = "AUTHERROR";
+                    $from->send($msg);
                     break;
                 }
+
+                // handle asking for join
+                if($row["count(*)"]==0){
+                    $query = $conn->prepare('SELECT * FROM drawing where id=?');
+                    $query->execute([$comm1[1]]);
+                    $row = $query->fetch();
+    
+                    $query = $conn->prepare('SELECT * FROM user where id=?');
+                    $query->execute([$msgsock1[2]["user_id"]]);
+                    $row1 = $query->fetch();
+    
+                    $msg = "ASKJOIN;".$msgsock1[2]["user_id"].";".$row1["username"].";";
+    
+                    foreach($clients as $client1){
+                        if($client1[2]["drawing_id"]==$comm1[1] && $client1[0]->resourceId!=$from->resourceId && $row["owner_id"]==$client1[2]["user_id"]){
+                            $client1[0]->send($msg);
+                        }
+                    }
+                    $from->send("WAITJOIN");
+                    break;
+
+                }
+
                 $msgsock1[2]["drawing_id"]=$comm1[1];
                 $from->send("DRAWINGSELECTED");
                 break;   
