@@ -247,8 +247,17 @@ function draggable(element) {
 
 
   function onMouseDown(event) {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
+    let crect = document.getElementById('canvas1').getBoundingClientRect();
+    mouseX = event.clientX - crect.left;
+    mouseY = event.clientY - crect.top;
+    const rightEdge = parseInt(element.style.left) + parseInt(element.style.width);
+    const leftEdge = rightEdge - 15;
+    const bottomEdge = parseInt(element.style.top) + parseInt(element.style.height);
+    const topEdge = bottomEdge - 15;
+    if (mouseX > leftEdge && mouseX < rightEdge && mouseY < bottomEdge && mouseY > topEdge) {
+      // resizing, don't drag
+      return;
+    }
     isMouseDown = true;
   }
 
@@ -264,8 +273,10 @@ function draggable(element) {
 
   function onMouseMove(event) {
     if (!isMouseDown) return;
-    var deltaX = event.clientX - mouseX;
-    var deltaY = event.clientY - mouseY;
+    let crect = document.getElementById('canvas1').getBoundingClientRect();
+
+    var deltaX = event.clientX - mouseX - crect.left;
+    var deltaY = event.clientY - mouseY - crect.top;
     element.style.left = elementX + deltaX + 'px';
     element.style.top = elementY + deltaY + 'px';
   }
