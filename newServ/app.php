@@ -69,7 +69,7 @@ class WSSocket implements MessageComponentInterface {
                 break;
             case "LOGOUT":
                 $msgsock1[2]["user_id"]=null;
-                $msg = "LOGOUT";
+                $msg = "LOGOUTSUCCESS";
                 $from->send($msg);
                 break;
             case "LOGIN":
@@ -141,7 +141,7 @@ class WSSocket implements MessageComponentInterface {
                     $query = $conn->prepare('UPDATE data SET command=? WHERE user_id = ? AND id = ?');
                     $query->execute([$comm1[3], $msgsock1[2]["user_id"], $comm1[2]]);
 
-                    $msg = "UUPDATE;".$msgsock1[2]["drawing_id"].";".$comm1[3].";";
+                    $msg = "UUPDATE;".$comm1[2].";".$comm1[3].";";
                     foreach($clients as $client1){
                         if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId){
                             //var_dump($client1[2]); echo $msg;
@@ -168,7 +168,7 @@ class WSSocket implements MessageComponentInterface {
                     $query = $conn->prepare('SELECT  max(id) FROM data where drawing_id =? AND deleted<>1');
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $rows = $query->fetchAll();
-                    var_dump($row);
+                    var_dump($rows);
                     foreach ($rows as $row) {
                         //$from->send("UUPDATE;".$msgsock1[2]["drawing_id"].";".$row["command"].";");
                     }
@@ -189,7 +189,7 @@ class WSSocket implements MessageComponentInterface {
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $rows = $query->fetchAll();
                     foreach ($rows as $row) {
-                        $from->send("UUPDATE;".$msgsock1[2]["drawing_id"].";".$row["command"].";");
+                        $from->send("UUPDATE;".$row["id"].";".$row["command"].";");
                     }
                     break;
                 } else {
