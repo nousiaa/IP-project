@@ -180,12 +180,6 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   const existingnote = document.getElementById(noteID);
 
   if (existingnote && existingDiv) {
-<<<<<<< HEAD
-    console.log("WTF!")
-    
-=======
-
->>>>>>> 007e2fc (also draw notes to export (almost))
     existingDiv.style.left = x;
     existingDiv.style.top = y;
     existingDiv.style.width = sx;
