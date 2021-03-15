@@ -39,7 +39,6 @@
                   <div id="connectListDIV" style="overflow-y: scroll;">
                      <table id="connectList"></table>
                   </div>
-
                </div>
             </div>
          </div>
@@ -49,6 +48,7 @@
                <input type="button" id="drawmode" value="DRAW" onClick="setDrawMode();">
                <input type="button" id="emode" value="ERASE" onClick="setEraseMode();">
                <input type="button" id="undoB" value="UNDO" onClick="doUndo();">
+               <input type="file" id ="imageloader" />
             </div>
             <div id = "canvDIV" style="position: relative; width: 640px; height: 400px; resize: both; border: 2px solid; overflow: auto;padding: 5px;">
                <canvas id="canvas" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
