@@ -511,8 +511,10 @@ async function windowAlmostLoad() {
       }
       result1string = drawPrefix + b64str;
     } else {
-      resizeCanvas();
-      forceRedraw();
+      if(resizeCanvas()){
+        forceRedraw();
+      }
+      
     }
   });
 
@@ -545,18 +547,22 @@ async function windowAlmostLoad() {
   //});
 
   function resizeCanvas() {
+    let didResize=false;
     const divx = canvasDIV.style.width.split("px")[0];
     const divy = canvasDIV.style.height.split("px")[0];
     //console.log(divx);
     if (canvas.width != divx) {
       canvas.width = divx;
       canvas1.width = divx;
+      didResize=true;
     }
 
     if (canvas.height != divy) {
       canvas.height = divy;
       canvas1.height = divy;
+      didResize=true;
     }
+    return didResize;
   }
 
   // Handle Mouse Coordinates
