@@ -354,6 +354,11 @@ async function windowAlmostLoad() {
     // Start Drawing
     context.beginPath();
     context.moveTo(mouseX, mouseY);
+    resultString +=
+    String.fromCharCode(mouseX & 255) +
+    String.fromCharCode((mouseX >> 8) & 255) +
+    String.fromCharCode(mouseY & 255) +
+    String.fromCharCode((mouseY >> 8) & 255);
   });
 
   // Draw line to x,y when mouse is pressed down
@@ -396,6 +401,7 @@ async function windowAlmostLoad() {
       setMouseCoordinates(event,"canvas");
       clearInterval(interVARl);
       isDrawing = false;
+
       //console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
       drawPrefix = "DATA:";
       let b64str = window.btoa(resultString)
@@ -411,6 +417,7 @@ async function windowAlmostLoad() {
       sendDataInterval();
       addToDrawingData(currentTMPid,result1string);
       //console.log(encodedData);
+      currentTMPid = 0;
       resultString = "";
 
   });
