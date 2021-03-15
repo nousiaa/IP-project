@@ -56,16 +56,15 @@ class WSSocket implements MessageComponentInterface {
 
         // handle the command
         switch ($comm1[0]){
-            case "test":
-                $msg = "";
-                for($i =0; $i<2000;$i++){
-                    $msg .= "test".$i;
+            case "JOIN":
+                if(empty($msgsock1[2]["user_id"])){
+                    $msg = "AUTHERROR";
+                    $from->send($msg);
+                    break;
                 }
-                
-                $from->send($msg);
-                break;
-            case "CONSOLELOG":
-                var_dump($msgsock1);
+                // TODO: secure join
+                $query = $conn->prepare('INSERT INTO allowed_users (drawing_id, user_id, deleted) VALUES (?,?,0)');
+                $query->execute([$comm1[1], $msgsock1[2]["user_id"]]);
                 break;
             case "LOGOUT":
                 $msgsock1[2]["user_id"]=null;
@@ -106,6 +105,9 @@ class WSSocket implements MessageComponentInterface {
                     $query = $conn->prepare('INSERT INTO drawing (owner_id,name,description,deleted) VALUES (?,?,?,0)');
                     $query->execute([$msgsock1[2]["user_id"], $comm1[2],$comm1[3]]);
                     $id = "DRAWINGID;".$conn->lastInsertId();
+                    $query = $conn->prepare('INSERT INTO allowed_users (drawing_id, user_id, deleted) VALUES (?,?,0)');
+                    $query->execute([$conn->lastInsertId(), $msgsock1[2]["user_id"]]);
+                    
                 } else if($comm1[1]=="NOTE"){
                     if(empty($msgsock1[2]["drawing_id"])){
                         $msg = "SELECTDRAWINGERROR";
@@ -123,7 +125,10 @@ class WSSocket implements MessageComponentInterface {
 
 
             case "SELECT":
-                if(empty($msgsock1[2]["user_id"])){
+                $query = $conn->prepare('SELECT count(*) from allowed_users WHERE drawing_id=? AND user_id=? AND deleted<>1');
+                $query->execute([$comm1[1], $msgsock1[2]["user_id"]]);
+                $row = $query->fetch();
+                if(empty($msgsock1[2]["user_id"])||$row["count(*)"]==0){
                     $from->send("AUTHERROR");
                     break;
                 }
