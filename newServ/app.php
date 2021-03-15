@@ -62,10 +62,46 @@ class WSSocket implements MessageComponentInterface {
                     $from->send($msg);
                     break;
                 }
-                // TODO: secure join
-                $query = $conn->prepare('INSERT INTO allowed_users (drawing_id, user_id, deleted) VALUES (?,?,0)');
-                $query->execute([$comm1[1], $msgsock1[2]["user_id"]]);
+
+                $query = $conn->prepare('SELECT * FROM drawing where id=?');
+                $query->execute([$msgsock1[2]["drawing_id"]]);
+                $row = $query->fetch();
+
+                foreach($clients as $client1){
+                    if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId && $row["owner_id"]==$client1[2]["user_id"]){
+                        //var_dump($client1[2]); echo $msg;
+                        $client1[0]->send($msg);
+                    }
+
+                }
+
                 break;
+            case "ALLOWJOIN":
+                if(empty($msgsock1[2]["user_id"])){
+                    $msg = "AUTHERROR";
+                    $from->send($msg);
+                    break;
+                }
+                $query = $conn->prepare('SELECT * FROM drawing where id=?');
+                $query->execute([$msgsock1[2]["drawing_id"]]);
+                $row = $query->fetch();
+                
+
+                if($msgsock1[2]["user_id"] != $row["owner_id"]){
+                    $msg = "AUTHERROR";
+                    $from->send($msg);
+                    break;
+                }
+                $query = $conn->prepare('SELECT * FROM users where username=?');
+                $query->execute([$comm1[1]]);
+                $row = $query->fetch();
+                
+
+
+                $query = $conn->prepare('INSERT INTO allowed_users (drawing_id, user_id, deleted) VALUES (?,?,0)');
+                $query->execute([$msgsock1[2]["drawing_id"], $row["id"]]);
+                break;
+
             case "LOGOUT":
                 $msgsock1[2]["user_id"]=null;
                 $msgsock1[2]["drawing_id"]=null;
