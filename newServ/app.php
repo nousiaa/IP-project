@@ -69,6 +69,7 @@ class WSSocket implements MessageComponentInterface {
                 break;
             case "LOGOUT":
                 $msgsock1[2]["user_id"]=null;
+                $msgsock1[2]["drawing_id"]=null;
                 $msg = "LOGOUTSUCCESS";
                 $from->send($msg);
                 break;
