@@ -2,9 +2,9 @@
 
 <html>
    <head>
-      
+
       <script src = "index.js"></script>
-    
+
    </head>
    <style>
          canvas {
@@ -14,14 +14,14 @@
 
 
    </style>
-   
+
    <body>
       <div id = "sse">
          <div id="output"></div>
          <div id="control">
             <input type="text" id="command" value="">
             <input type="button" id="connect" value="connect" onClick="connectWS()">
-            <input type="button" id="send" value="send" onClick="sendMessage(socket,document.getElementById('command').value)">       
+            <input type="button" id="send" value="send" onClick="sendMessage(socket,document.getElementById('command').value)">
          </div> <br/>
          <div id="loginbox" style = "float: left; width: 100; height:100%;">
             <div id="needlogin">
@@ -30,7 +30,7 @@
                <input type="button" id="login" value="Login" onClick="doLogin();">
             </div>
             <div id="loggedin" style="display:none; ">
-               Logged in as: 
+               Logged in as:
                <div id="loggedinname" style="display: inline;"></div>
                <input type="button" id="login" value="Logout" onClick="doLogout();">
                <div id="drawselect" style="">
@@ -49,6 +49,7 @@
                <input type="button" id="emode" value="ERASE" onClick="setEraseMode();">
                <input type="button" id="undoB" value="UNDO" onClick="doUndo();">
                <input type="file" id ="imageloader" />
+               <input type="button" id="exportImage" value ="EXPORT" onClick="exportImage();">
             </div>
             <div id = "canvDIV" style="position: relative; width: 640px; height: 400px; resize: both; border: 2px solid; overflow: auto;padding: 5px;">
                <canvas id="canvas" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
@@ -60,6 +61,6 @@
 
 
       </div>
-      
+
    </body>
 </html>

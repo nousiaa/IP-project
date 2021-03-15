@@ -571,3 +571,13 @@ async function windowAlmostLoad() {
     mouseY = event.clientY - crect.top;
   }
 }
+
+function exportImage() {
+  const canvas = document.getElementById('canvas1');
+  const data = canvas.toDataURL();
+  const anchor = document.createElement("a");
+  anchor.href = data;
+  anchor.download = "export.png"
+  anchor.target = "_blank";
+  anchor.click();
+}
