@@ -68,13 +68,13 @@ class WSSocket implements MessageComponentInterface {
                 $row = $query->fetch();
 
                 foreach($clients as $client1){
-                    if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId && $row["owner_id"]==$client1[2]["user_id"]){
+                    if($client1[2]["drawing_id"]==$comm1[1] && $client1[0]->resourceId!=$from->resourceId && $row["owner_id"]==$client1[2]["user_id"]){
                         //var_dump($client1[2]); echo $msg;
                         $client1[0]->send($msg);
                     }
 
                 }
-
+                $from->send("WAITJOIN");
                 break;
             case "ALLOWJOIN":
                 if(empty($msgsock1[2]["user_id"])){
