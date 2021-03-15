@@ -408,7 +408,9 @@ async function doLogin() {
 }
 
 function createNewDrawing() {
-  socket.send("NEW;DRAWING;TESTI1;TESTI1;");
+  const drawingName = prompt("Name for drawing", "") || "no name";
+  const drawingDesc = prompt("Description for drawing", "") || "no description";
+  socket.send("NEW;DRAWING;"+drawingName+";"+drawingDesc+";");
   socket.send("LIST;DRAWING;");
 }
 function selectDraw(id) {
