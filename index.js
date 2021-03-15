@@ -2,6 +2,7 @@ let data = "test;"; //"LOGIN;test;test"
 var result1string = "";
 var currentTMPid = 0;
 let socket = null;
+var active = false;
 var drawmode = 0;
 var drawingData = [[], []];
 
@@ -223,7 +224,7 @@ function uploadImage(e) {
   //socket.send(command)
 }
 
-function createNote(noteID, x, y, tvalue, sx = "30px", sy = "20px") {
+function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   const existingnote = document.getElementById(noteID);
 
   if (existingnote) {
@@ -233,7 +234,15 @@ function createNote(noteID, x, y, tvalue, sx = "30px", sy = "20px") {
     existingnote.style.height = sy;
     existingnote.value = tvalue;
   } else {
+    let div = document.createElement("div-textarea");
     let input = document.createElement("textarea");
+
+
+    div.appendChild(input)
+
+    div.
+
+
     input.type = "text";
     input.id = noteID;
     input.oninput = function () {
@@ -257,9 +266,26 @@ function createNote(noteID, x, y, tvalue, sx = "30px", sy = "20px") {
     input.classList.add("drawNote");
     //console.log(noteID);
 
-    document.getElementById("canvDIV").appendChild(input);
+    document.getElementById("canvDIV").appendChild(div);
   }
 }
+
+const dragElement = (elem) => {
+  let pos1 =0, pos2 = 0, pos3 = 0, pos4 = 0;
+  elem.onmousedown = handleDragStart;
+
+  const handleDragStart = (event) => {
+
+  } 
+  const handleDrag = (event) => {
+
+  }
+
+  const handleDragEnd = (event) => {
+
+  }
+}
+
 /*
  *Waits for connection to be established, terminates if connection doesn't work after x number times.
  */
