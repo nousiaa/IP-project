@@ -65,7 +65,7 @@ function processDrawCommand(command){
 }
 
 function connectWS() {
-  socket = new WebSocket("ws://localhost:10000");//"wss://n0p0.com/wss2/");
+  socket = new WebSocket("wss://n0p0.com/wss2/"); //ws://localhost:10000");//"
   // Connection opened
   socket.addEventListener("open", function (event) {
     document.getElementById("output").innerHTML += "<b>CONNECTED<b></b>\n</br>";
