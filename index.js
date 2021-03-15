@@ -228,14 +228,14 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     input.style.top = 0;
     input.value = tvalue;
     input.classList.add("drawNote");
-    draggable(div);
+    draggable(div,input);
     //console.log(noteID);
 
     document.getElementById("canvDIV").appendChild(div);
   }
 }
 
-function draggable(element) {
+function draggable(element,noteinput) {
   var isMouseDown = false;
   var mouseX = 0;
   var mouseY = 0;
@@ -264,6 +264,15 @@ function draggable(element) {
   element.addEventListener('mouseup', onMouseUp);
 
   function onMouseUp(event) {
+
+    updateNote(
+      noteinput.id,
+      noteinput.value,
+      element.style.left,
+      element.style.top,
+      element.style.width,
+      element.style.height
+    );
     isMouseDown = false;
     elementX = parseInt(element.style.left) || 0;
     elementY = parseInt(element.style.top) || 0;
