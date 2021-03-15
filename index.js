@@ -230,7 +230,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   const existingDiv = document.getElementById(divID)
 
   if (existingnote && existingDiv) {
-    
+
     existingDiv.style.left = x;
     existingDiv.style.top = y;
     existingDiv.style.width = sx;
@@ -572,11 +572,12 @@ async function windowAlmostLoad() {
 }
 
 function exportImage() {
-  const canvas = document.getElementById('canvas1');
-  const data = canvas.toDataURL();
-  const anchor = document.createElement("a");
-  anchor.href = data;
-  anchor.download = "export.png"
-  anchor.target = "_blank";
-  anchor.click();
+  html2canvas(document.querySelector("#canvDIV")).then(canvas => {
+    const data = canvas.toDataURL();
+    const anchor = document.createElement("a");
+    anchor.href = data;
+    anchor.download = "export.png"
+    anchor.target = "_blank";
+    anchor.click();
+  })
 }
