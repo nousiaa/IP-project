@@ -3,13 +3,33 @@ var result1string = "";
 var currentTMPid = 0;
 let socket = null;
 var drawmode = 0;
-
+var drawingData = [];
 function updateNote(noteid,notedata,x,y,sx,sy) {
   const nid = noteid.split("_")
   if (nid[1]) {
     
     socket.send("UPDATE;DATA;" + nid[1] + ";NOTE:"+ btoa(noteid+":"+x+":"+y+":"+sx+":"+sy+":"+notedata));
   }
+}
+function clearScreen(){
+  let canvasc = document.getElementById("canvas")
+  let canvascc = canvasc.getContext("2d");
+  let canvasc1 = document.getElementById("canvas1")
+  let canvascc1 = canvasc1.getContext("2d");
+  canvascc.clearRect(0, 0, canvasc.width, canvasc.height);
+  canvascc1.clearRect(0, 0, canvasc1.width, canvasc1.height);
+  let itm = document.getElementsByClassName("drawNote");
+  while(itm.length > 0){
+    itm[0].parentNode.removeChild(itm[0]);
+  };
+  drawingData = [];
+}
+
+function processDrawCommand(command){
+  const tmpdata1 = command.split(":");
+  if (tmpdata1[0] == "DATA")convert64BaseStringToCoordinates(tmpdata1[1],false);
+  else if (tmpdata1[0] == "NOTE")convert64BaseStringToNote(tmpdata1[1]);
+  else if (tmpdata1[0] == "ERASE")convert64BaseStringToCoordinates(tmpdata1[1],true);
 }
 
 function connectWS() {
@@ -24,22 +44,11 @@ function connectWS() {
    // console.log(tmpdata);
     if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
     else if (tmpdata[0] == "UUPDATE") {
-      const tmpdata1 = tmpdata[2].split(":");
-      if (tmpdata1[0] == "DATA")convert64BaseStringToCoordinates(tmpdata1[1],false);
-      else if (tmpdata1[0] == "NOTE")convert64BaseStringToNote(tmpdata1[1]);
-      else if (tmpdata1[0] == "ERASE")convert64BaseStringToCoordinates(tmpdata1[1],true);
+      drawingData.push([tmpdata[1],tmpdata[2]]);
+      processDrawCommand(tmpdata[2]);
     }
     else if (tmpdata[0] == "DRAWINGSELECTED"){
-      let canvasc = document.getElementById("canvas")
-      let canvascc = canvasc.getContext("2d");
-      let canvasc1 = document.getElementById("canvas1")
-      let canvascc1 = canvasc1.getContext("2d");
-      canvascc.clearRect(0, 0, canvasc.width, canvasc.height);
-      canvascc1.clearRect(0, 0, canvasc1.width, canvasc1.height);
-      let itm = document.getElementsByClassName("drawNote");
-      while(itm.length > 0){
-        itm[0].parentNode.removeChild(itm[0]);
-      };
+      clearScreen();
       socket.send("SEND;DATA;");
     }
     else if (tmpdata[0] == "DRAWINGLIST"){
@@ -72,9 +81,14 @@ function connectWS() {
     } else if (tmpdata[0] == "NEWNOTE"){
       createNote("note_"+tmpdata[1],tmpdata[2],tmpdata[3],"");
 
+    }else if (tmpdata[0] == "LOGOUTSUCCESS"){
+      document.getElementById("loggedinname").innerHTML = "";
+      document.getElementById("needlogin").style.display = "";
+      document.getElementById("loggedin").style.display = "none";
+      clearScreen();
     }
 
-
+    
 
 
 
@@ -236,6 +250,9 @@ function createNewDrawing(){
 function selectDraw(id) {
   socket.send("SELECT;" + id + ";");
 }
+function doUndo() {
+  socket.send("UNDO;DRAWING;");
+}
 //async function selectDraw(id) {
 //  return await sendMessage(socket, "SELECT;" + id + ";", true);
 //}
@@ -243,7 +260,9 @@ function selectDraw(id) {
 function updateList() {
   socket.send("LIST;DRAWING;");
 }
-function doLogout() {}
+function doLogout() {
+  socket.send("LOGOUT;");
+}
 window.onload = () => {
   windowAlmostLoad();
 };
