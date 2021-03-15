@@ -199,7 +199,7 @@ function connectWS() {
   defaultMessageListener(socket);
 }
 
-function uploadImage(e,) {
+function uploadImage(e) {
   let reader = new FileReader();
   let canvas = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
@@ -213,7 +213,7 @@ function uploadImage(e,) {
   let dataURL = reader.readAsDataURL(e.target.files[0]);
   let prefix = "NEW;IMAGE;30:30:" + dataURL
   let command = prefix + dataURL
-  socket.send(command)
+  //socket.send(command)
 }
 
 function createNote(noteID, x, y, tvalue, sx = "30px", sy = "20px") {
