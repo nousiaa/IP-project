@@ -148,62 +148,7 @@ function connectWS() {
         }
         break;
     }
-    //if (tmpdata[0] == "DATAID") {
-    //  currentTMPid = tmpdata[1];
-    //} else if (tmpdata[0] == "UUPDATE") {
-    //  addToDrawingData(tmpdata[1],tmpdata[2]);
-    //  processDrawCommand(tmpdata[2]);
-    //} else if (tmpdata[0] == "DRAWINGSELECTED"){
-    //  clearScreen();
-    //  socket.send("SEND;DATA;");
-    //} else if (tmpdata[0] == "DRAWINGLIST"){
-    //  let rows = tmpdata;
-    // // console.log(rows);
-    //  document.getElementById("connectList").innerHTML =
-    //    "<tr><th>Name</th><th>Description</th><th>Connect</th></tr>";
-    //  rows.forEach((x) => {
-    //    var subrow = x.split(":");
-    //  //  console.log(subrow);
-    //    if (subrow[0] && subrow[0]!="DRAWINGLIST")
-    //      document.getElementById("connectList").innerHTML +=
-    //        "<tr><td>" +
-    //        subrow[1] +
-    //        "</td><td>" +
-    //        subrow[2] +
-    //        "</td><td><input type='button' id='Connect" +
-    //        subrow[0] +
-    //        "' value='Connect' onClick='selectDraw(" +
-    //        subrow[0] +
-    //        ");'></td></tr>";
-    //  });
-    //} else if (tmpdata[0] == "LOGINSUCCESS"){
-    //  document.getElementById("loggedinname").innerHTML = document.getElementById(
-    //    "username"
-    //  ).value;
-    //  document.getElementById("needlogin").style.display = "none";
-    //  document.getElementById("loggedin").style.display = "";
-    //  updateList();
-    //} else if (tmpdata[0] == "NEWNOTE"){
-    //  createNote("note_"+tmpdata[1],tmpdata[2],tmpdata[3],"");
-    //
-    //} else if (tmpdata[0] == "LOGOUTSUCCESS"){
-    //  document.getElementById("loggedinname").innerHTML = "";
-    //  document.getElementById("needlogin").style.display = "";
-    //  document.getElementById("loggedin").style.display = "none";
-    //  clearScreen();
-    //} else if (tmpdata[0] == "DOUNDO"){
-    //  remove1DrawingData(tmpdata[1])
-    //  forceRedraw();
-    //}
-    //
-    //
-    //
-    //
-    //
-    ////console.log("Message from server ", event.data);
-    ////document.getElementById("output").innerHTML += event.data + "\n</br>";
   });
-  //
   defaultMessageListener(socket);
 }
 
@@ -230,6 +175,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   const existingDiv = document.getElementById(divID)
 
   if (existingnote) {
+    console.log("WTF!")
     
     existingDiv.style.left = x;
     existingDiv.style.top = y;
@@ -252,7 +198,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     //div.addEventListener("mousedown", dragElement)
 
 
-    div.style = "position: absolute;"
+    div.style = "position: absolute; resize: both; z-index: 2;"
     div.id = divID
     div.style.left = x;
     div.style.top = y;
@@ -265,15 +211,14 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
       updateNote(
         this.id,
         this.value,
-        input.style.left,
-        input.style.top,
+        div.style.left,
+        div.style.top,
         this.style.width,
         this.style.height
       );
     };
     input.classList.add("drawNote");
-    input.style =
-      "display:block; position: relative; z-index: 2; border: none; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7);";
+    input.style = "display:block; position: relative; z-index: 2; border: none; resize: none; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7);";
     input.style.left = 0;
     input.style.top = 0;
     input.style.width = sx;
