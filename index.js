@@ -230,7 +230,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     input.style.top = 0;
     input.value = tvalue;
     input.classList.add("drawNote");
-    draggable(div)
+    draggable(div);
     //console.log(noteID);
 
     document.getElementById("canvDIV").appendChild(div);
@@ -246,12 +246,12 @@ function draggable(element) {
 	var isMouseDown = false;
 
     // initial mouse X and Y for `mousedown`
-    var mouseX;
-    var mouseY;
+    var mouseX = 0;
+    var mouseY = 0;
 
     // element X and Y before and after move
-    var elementX = 0;
-    var elementY = 0;
+    var elementX = element.style.left;
+    var elementY = element.style.top;
 
 	// mouse button down over the element
     element.addEventListener('mousedown', onMouseDown);
