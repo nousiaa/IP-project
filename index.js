@@ -108,6 +108,7 @@ function connectWS() {
       ).value;
       document.getElementById("needlogin").style.display = "none";
       document.getElementById("loggedin").style.display = "";
+      updateList();
     } else if (tmpdata[0] == "NEWNOTE"){
       createNote("note_"+tmpdata[1],tmpdata[2],tmpdata[3],"");
 
@@ -309,6 +310,7 @@ function sendDataInterval() {
 
 
 async function windowAlmostLoad() {
+  let canvasDIV = document.getElementById("canvDIV");
   let canvas = document.getElementById("canvas");
   let canvas1 = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
@@ -358,6 +360,7 @@ async function windowAlmostLoad() {
   canvas.addEventListener("mousemove", function (event) {
       setMouseCoordinates(event,"canvas");
 
+
       if (isDrawing) {
         mouseXmin = mouseXmin > mouseX ? mouseX : mouseXmin;
         mouseYmin = mouseYmin > mouseY ? mouseY : mouseYmin;
@@ -382,6 +385,9 @@ async function windowAlmostLoad() {
         convert64BaseStringToCoordinates(b64str,false);
       }
       result1string = drawPrefix+b64str;
+      } else {
+        resizeCanvas();
+        forceRedraw();
       }
   });
 
@@ -406,7 +412,26 @@ async function windowAlmostLoad() {
       addToDrawingData(currentTMPid,result1string);
       //console.log(encodedData);
       resultString = "";
+
   });
+  //canvasDIV.addEventListener("mousemove", function (event) {
+
+  //});
+
+function resizeCanvas(){
+  const divx = canvasDIV.style.width.split("px")[0]
+  const divy = canvasDIV.style.height.split("px")[0]
+  //console.log(divx);
+  if(canvas.width!=divx) {
+    canvas.width=divx;
+    canvas1.width=divx;
+  }
+
+  if(canvas.height!=divy) {
+    canvas.height=divy;
+    canvas1.height=divy;
+  };
+}
 
   // Handle Mouse Coordinates
   function setMouseCoordinates(event,canv) {

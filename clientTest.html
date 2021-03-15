@@ -17,39 +17,48 @@
    
    <body>
       <div id = "sse">
-         <div id="loginbox">
+         <div id="output"></div>
+         <div id="control">
+            <input type="text" id="command" value="">
+            <input type="button" id="connect" value="connect" onClick="connectWS()">
+            <input type="button" id="send" value="send" onClick="sendMessage(socket,document.getElementById('command').value)">       
+         </div> <br/>
+         <div id="loginbox" style = "float: left; width: 100; height:100%;">
             <div id="needlogin">
-               Username: <input type="text" id="username" value="test">
-               Password: <input type="text" id="password" value="test">
+               Username: <input type="text" id="username" value="test"><br/>
+               Password: <input type="text" id="password" value="test"><br/>
                <input type="button" id="login" value="Login" onClick="doLogin();">
             </div>
-            <div id="loggedin" style="display:none;">
+            <div id="loggedin" style="display:none; ">
                Logged in as: 
                <div id="loggedinname" style="display: inline;"></div>
                <input type="button" id="login" value="Logout" onClick="doLogout();">
-               <div id="drawselect">
+               <div id="drawselect" style="">
                   <input type="button" id="login" value="LIST DRAWINGS" onClick="updateList();">
                   <input type="button" id="login" value="NEW DRAWING" onClick="createNewDrawing();">
-                  <table id="connectList" style=""></table>
+                  <div id="connectListDIV" style="overflow-y: scroll;">
+                     <table id="connectList"></table>
+                  </div>
+
                </div>
             </div>
          </div>
-         <div id = "canvDIV" style="position: relative; width: 640px; height: 400px;">
-            <canvas id="canvas" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
-            <canvas id="canvas1" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+         <div id="drawcontainer" style="float: left;">
+            <div id="drawcontrols">
+               <input type="button" id="notemode" value="NOTE" onClick="setNoteMode();">
+               <input type="button" id="drawmode" value="DRAW" onClick="setDrawMode();">
+               <input type="button" id="emode" value="ERASE" onClick="setEraseMode();">
+               <input type="button" id="undoB" value="UNDO" onClick="doUndo();">
+            </div>
+            <div id = "canvDIV" style="position: relative; width: 640px; height: 400px; resize: both; border: 2px solid; overflow: auto;padding: 5px;">
+               <canvas id="canvas" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
+               <canvas id="canvas1" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+            </div>
+
          </div>
-         <div id="drawcontrols">
-            <input type="button" id="notemode" value="NOTE" onClick="setNoteMode();">
-            <input type="button" id="drawmode" value="DRAW" onClick="setDrawMode();">
-            <input type="button" id="emode" value="ERASE" onClick="setEraseMode();">
-            <input type="button" id="undoB" value="UNDO" onClick="doUndo();">
-         </div>
-         <div id="output"></div>
-         <div id="control">
-         <input type="text" id="command" value="">
-         <input type="button" id="connect" value="connect" onClick="connectWS()">
-         <input type="button" id="send" value="send" onClick="sendMessage(socket,document.getElementById('command').value)">       
-         </div>
+
+
+
       </div>
       
    </body>
