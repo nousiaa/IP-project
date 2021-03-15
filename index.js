@@ -57,7 +57,7 @@ function clearScreen(retaindata = false) {
   while (divs.length > 0) {
     divs[0].parentNode.removeChild(divs[0]);
   }
-  
+
   while (itm.length > 0) {
     itm[0].parentNode.removeChild(itm[0]);
   }
@@ -146,10 +146,10 @@ function connectWS() {
         clearScreen();
         break;
       case "ASKJOIN":
-        if(confirm("Allow user "+tmpdata[2]+" to join this drawing?")){
-          socket.send("ALLOWJOIN;"+tmpdata[1]+";");
+        if (confirm("Allow user " + tmpdata[2] + " to join this drawing?")) {
+          socket.send("ALLOWJOIN;" + tmpdata[1] + ";");
         } else {
-          socket.send("DISALLOWJOIN;"+tmpdata[1]+";");
+          socket.send("DISALLOWJOIN;" + tmpdata[1] + ";");
         }
         break;
     }
@@ -183,7 +183,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     existingDiv.style.left = x;
     existingDiv.style.top = y;
     existingDiv.style.width = sx;
-    existingDiv.style.height =sy;
+    existingDiv.style.height = sy;
 
 
     existingnote.style.left = 0;
@@ -197,7 +197,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
 
 
     div.appendChild(input)
-    
+
     //div.addEventListener("mousedown", dragElement)
 
 
@@ -206,7 +206,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     div.style.left = x;
     div.style.top = y;
     div.style.width = sx;
-    div.style.height =sy;
+    div.style.height = sy;
 
 
 
@@ -236,40 +236,39 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
 }
 
 function draggable(element) {
-	var isMouseDown = false;
+  var isMouseDown = false;
+  var mouseX = 0;
+  var mouseY = 0;
 
-    var mouseX = 0;
-    var mouseY = 0;
+  var elementX = element.style.left;
+  var elementY = element.style.top;
 
-    var elementX = element.style.left;
-    var elementY = element.style.top;
-
-    element.addEventListener('mousedown', onMouseDown);
+  element.addEventListener('mousedown', onMouseDown);
 
 
-	function onMouseDown(event) {
-        mouseX = event.clientX;
-        mouseY = event.clientY;
-        isMouseDown = true;
-    }
+  function onMouseDown(event) {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    isMouseDown = true;
+  }
 
-    element.addEventListener('mouseup', onMouseUp);
+  element.addEventListener('mouseup', onMouseUp);
 
-	function onMouseUp(event) {
-        isMouseDown = false;
-        elementX = parseInt(element.style.left) || 0;
-        elementY = parseInt(element.style.top) || 0;
-    }
+  function onMouseUp(event) {
+    isMouseDown = false;
+    elementX = parseInt(element.style.left) || 0;
+    elementY = parseInt(element.style.top) || 0;
+  }
 
-    document.addEventListener('mousemove', onMouseMove);
-    
-	function onMouseMove(event) {
-    	if (!isMouseDown) return;
-        var deltaX = event.clientX - mouseX;
-        var deltaY = event.clientY - mouseY;
-        element.style.left = elementX + deltaX + 'px';
-        element.style.top = elementY + deltaY + 'px';
-    }
+  document.addEventListener('mousemove', onMouseMove);
+
+  function onMouseMove(event) {
+    if (!isMouseDown) return;
+    var deltaX = event.clientX - mouseX;
+    var deltaY = event.clientY - mouseY;
+    element.style.left = elementX + deltaX + 'px';
+    element.style.top = elementY + deltaY + 'px';
+  }
 }
 
 /*
@@ -321,7 +320,7 @@ const sendMessage = async (socket, msg, callback) => {
 //TODO: Add default behaviour, such as parsing message.
 const defaultMessageListener = (socket) => {
   socket.onmessage = null;
-  socket.onmessage = (event) => {};
+  socket.onmessage = (event) => { };
 };
 
 const receiveMessage = (socket) => {
@@ -381,10 +380,10 @@ const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
 async function doLogin() {
   socket.send(
     "LOGIN;" +
-      document.getElementById("username").value +
-      ";" +
-      document.getElementById("password").value +
-      ";"
+    document.getElementById("username").value +
+    ";" +
+    document.getElementById("password").value +
+    ";"
   );
 }
 
