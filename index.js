@@ -174,7 +174,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   const existingnote = document.getElementById(noteID);
   const existingDiv = document.getElementById(divID)
 
-  if (existingnote) {
+  if (existingnote && existingDiv) {
     console.log("WTF!")
     
     existingDiv.style.left = x;
@@ -198,7 +198,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     //div.addEventListener("mousedown", dragElement)
 
 
-    div.style = "position: absolute; resize: both; z-index: 2;"
+    div.style = "position: absolute; resize: both; z-index: 2; overflow: hidden; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7);"
     div.id = divID
     div.style.left = x;
     div.style.top = y;
@@ -213,16 +213,14 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
         this.value,
         div.style.left,
         div.style.top,
-        this.style.width,
-        this.style.height
+        div.style.width,
+        div.style.height
       );
     };
     input.classList.add("drawNote");
-    input.style = "display:block; position: relative; z-index: 2; border: none; resize: none; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7);";
+    input.style = "display:block; position: relative; z-index: 2; width: 100%; height: 100%; border: none; resize: none; background-color: rgba(255,255,204,0.1);";
     input.style.left = 0;
     input.style.top = 0;
-    input.style.width = sx;
-    input.style.height = sy;
     input.value = tvalue;
     input.classList.add("drawNote");
     //console.log(noteID);
