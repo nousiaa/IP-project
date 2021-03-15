@@ -180,8 +180,12 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   const existingnote = document.getElementById(noteID);
 
   if (existingnote && existingDiv) {
+<<<<<<< HEAD
     console.log("WTF!")
     
+=======
+
+>>>>>>> 007e2fc (also draw notes to export (almost))
     existingDiv.style.left = x;
     existingDiv.style.top = y;
     existingDiv.style.width = sx;
@@ -237,60 +241,34 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   }
 }
 
-/**
- * Makes an element draggable.
- *
- * @param {HTMLElement} element - The element.
- */
 function draggable(element) {
 	var isMouseDown = false;
 
-    // initial mouse X and Y for `mousedown`
     var mouseX = 0;
     var mouseY = 0;
 
-    // element X and Y before and after move
     var elementX = element.style.left;
     var elementY = element.style.top;
 
-	// mouse button down over the element
     element.addEventListener('mousedown', onMouseDown);
 
-	/**
-     * Listens to `mousedown` event.
-     *
-     * @param {Object} event - The event.
-     */
+
 	function onMouseDown(event) {
         mouseX = event.clientX;
         mouseY = event.clientY;
         isMouseDown = true;
     }
 
-	// mouse button released
     element.addEventListener('mouseup', onMouseUp);
 
-	/**
-     * Listens to `mouseup` event.
-     *
-     * @param {Object} event - The event.
-     */
 	function onMouseUp(event) {
         isMouseDown = false;
         elementX = parseInt(element.style.left) || 0;
         elementY = parseInt(element.style.top) || 0;
     }
 
-	// need to attach to the entire document
-    // in order to take full width and height
-    // this ensures the element keeps up with the mouse
     document.addEventListener('mousemove', onMouseMove);
-
-	/**
-     * Listens to `mousemove` event.
-     *
-     * @param {Object} event - The event.
-     */
+    
 	function onMouseMove(event) {
     	if (!isMouseDown) return;
         var deltaX = event.clientX - mouseX;
@@ -587,11 +565,12 @@ async function windowAlmostLoad() {
 }
 
 function exportImage() {
-  const canvas = document.getElementById('canvas1');
-  const data = canvas.toDataURL();
-  const anchor = document.createElement("a");
-  anchor.href = data;
-  anchor.download = "export.png"
-  anchor.target = "_blank";
-  anchor.click();
+  html2canvas(document.querySelector("#canvDIV")).then(canvas => {
+    const data = canvas.toDataURL();
+    const anchor = document.createElement("a");
+    anchor.href = data;
+    anchor.download = "export.png"
+    anchor.target = "_blank";
+    anchor.click();
+  })
 }
