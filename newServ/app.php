@@ -165,12 +165,16 @@ class WSSocket implements MessageComponentInterface {
                     break;
                 }
                 if ($comm1[1]=="DATA") {
-                    $query = $conn->prepare('SELECT  max(id) FROM data where drawing_id =? AND deleted<>1');
+                    $query = $conn->prepare('SELECT  max(id)  FROM data where drawing_id =? AND deleted<>1');
                     $query->execute([$msgsock1[2]["drawing_id"]]);
-                    $rows = $query->fetchAll();
-                    var_dump($rows);
-                    foreach ($rows as $row) {
-                        //$from->send("UUPDATE;".$msgsock1[2]["drawing_id"].";".$row["command"].";");
+                    $row = $query->fetch();
+
+                    $query = $conn->prepare('UPDATE data SET deleted=1 WHERE drawing_id = ? AND id = ?');
+                    $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"]]);
+
+                    $msg = "DOUNDO;".$row["max(id)"].";";
+                    foreach($clients as $client1){
+                        $client1[0]->send($msg);
                     }
                     break;
                 } else {
