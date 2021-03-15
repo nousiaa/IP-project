@@ -198,6 +198,24 @@ function connectWS() {
   //
   defaultMessageListener(socket);
 }
+
+function uploadImage(e,) {
+  let reader = new FileReader();
+  let canvas = document.getElementById("canvas1");
+  let context = canvas.getContext("2d");
+  reader.onload = (event) => {
+    let img = new Image();
+    img.onload = () => {
+      context.drawImage(img, 30, 30);
+    };
+    img.src = event.target.result;
+  };
+  let dataURL = reader.readAsDataURL(e.target.files[0]);
+  let prefix = "NEW;IMAGE;30:30:" + dataURL
+  let command = prefix + dataURL
+  socket.send(command)
+}
+
 function createNote(noteID, x, y, tvalue, sx = "30px", sy = "20px") {
   const existingnote = document.getElementById(noteID);
 
@@ -315,6 +333,7 @@ const convert64BaseStringToNote = (str) => {
   //console.log(note);
   createNote(note[0], note[1], note[2], note[5], note[3], note[4]);
 };
+
 const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
   parseString = window.atob(str);
   let canvas = document.getElementById("canvas1");
@@ -338,11 +357,6 @@ const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
     context.stroke();
   }
   context.closePath();
-};
-
-const parseMessage = (msg) => {
-  const splittedString = msg.split(";");
-  //console.log(splittedString);
 };
 
 async function doLogin() {
@@ -391,6 +405,8 @@ async function windowAlmostLoad() {
   let canvas = document.getElementById("canvas");
   let canvas1 = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
+  let imageloader = document.getElementById("imageloader");
+  imageloader.addEventListener("change", uploadImage);
   let resultString = "";
   let mouseXmin = 0;
   let mouseYmin = 0;
