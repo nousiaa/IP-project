@@ -15,6 +15,14 @@ Commands:
 
 Client -> Server:
 
+
+JOIN;id;
+*send join request to a whiteboard
+*issues ALLOWACCESS;username; command to drawing owner
+
+ALLOWJOIN;username;
+* allow user to join board
+
 LOGIN;<username>;<password>
 
 *do login with credentials
@@ -24,19 +32,22 @@ LOGOUT;
 
 *do logout
 
+* returns LOGOUTSUCCESS;
 
 
-NEW;DATA|DRAWING;
+NEW;DATA|DRAWING|NOTE;
 
 *for drawing parameters are name;description;
 
 *for data, no parameters needed, returns id
 
 
+* 
 
 SELECT;<id>;
 
 *select drawing with id as active
+
 
 
 
@@ -51,6 +62,7 @@ for data updates, data is constantly resent as a whole
 after data update, given data is also sent to all connected clients
 
 
+*returns OK for sending client
 
 SEND;DATA; 
 *resend all parts of the selected drawing
@@ -66,6 +78,8 @@ UUPDATE;<drawingid>;<command>;
 LOGINSUCCESS
 *login was successful
 
+LOGOUTSUCCESS
+* logout successful
 
 DATAID;<id>;
 *server assigned client an new data id
