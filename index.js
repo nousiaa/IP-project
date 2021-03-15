@@ -141,10 +141,10 @@ function connectWS() {
         clearScreen();
         break;
       case "ASKJOIN":
-        if(confirm("Allow user "+tmpdata[1]+" to join this drawing?")){
-          socket.send("ALLOWJOIN;"+tmpdata[0]+";");
+        if(confirm("Allow user "+tmpdata[2]+" to join this drawing?")){
+          socket.send("ALLOWJOIN;"+tmpdata[1]+";");
         } else {
-          socket.send("DISALLOWJOIN;"+tmpdata[0]+";");
+          socket.send("DISALLOWJOIN;"+tmpdata[1]+";");
         }
         break;
     }
