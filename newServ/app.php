@@ -64,7 +64,7 @@ class WSSocket implements MessageComponentInterface {
                 }
 
                 $query = $conn->prepare('SELECT * FROM drawing where id=?');
-                $query->execute([$msgsock1[2]["drawing_id"]]);
+                $query->execute([$comm1[1]]);
                 $row = $query->fetch();
 
                 foreach($clients as $client1){
