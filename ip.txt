@@ -24,6 +24,13 @@ CREATE TABLE user(
     password text NOT NULL, 
     deleted int
 );
+CREATE TABLE allowed_users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    drawing_id int,
+    user_id int,
+    deleted int
+);
+
 //test,test
 INSERT INTO user (username, password, deleted ) VALUES ("test","$2y$10$x89D0NaocUnJNcPAuL1vb.RZZAg1xRAC43hKQsUZ2lsdV/.XbJ7Yu",0);
 
