@@ -3,15 +3,46 @@ var result1string = "";
 var currentTMPid = 0;
 let socket = null;
 var drawmode = 0;
-var drawingData = [];
+var drawingData = [[],[]];
+
+function addToDrawingData(id,command){
+  //console.log(id,command);
+  const existID = drawingData[0].indexOf(id)
+  if(existID==-1){
+    drawingData[0].push(id);
+    drawingData[1].push(command);
+  }else {
+    drawingData[1][existID]=command;
+  }
+}
+function remove1DrawingData(id){
+  const existID = drawingData[0].indexOf(id)
+  if(existID!=-1){
+    drawingData[0].splice(existID, 1)
+    drawingData[1].splice(existID, 1)
+  }
+}
+function clearDrawingData(){
+  drawingData = [[],[]];
+}
+
 function updateNote(noteid,notedata,x,y,sx,sy) {
   const nid = noteid.split("_")
   if (nid[1]) {
-    
-    socket.send("UPDATE;DATA;" + nid[1] + ";NOTE:"+ btoa(noteid+":"+x+":"+y+":"+sx+":"+sy+":"+notedata));
+    const notecommand = "NOTE:"+ btoa(noteid+":"+x+":"+y+":"+sx+":"+sy+":"+notedata);
+    addToDrawingData(nid[1],notecommand);
+    socket.send("UPDATE;DATA;" + nid[1] + ";"+notecommand);
   }
 }
-function clearScreen(){
+
+function forceRedraw(){
+  clearScreen(true);
+  drawingData[1].forEach(element => {
+    processDrawCommand(element);
+  });
+}
+
+function clearScreen(retaindata=false){
   let canvasc = document.getElementById("canvas")
   let canvascc = canvasc.getContext("2d");
   let canvasc1 = document.getElementById("canvas1")
@@ -22,18 +53,19 @@ function clearScreen(){
   while(itm.length > 0){
     itm[0].parentNode.removeChild(itm[0]);
   };
-  drawingData = [];
+  if(!retaindata)clearDrawingData();
 }
 
 function processDrawCommand(command){
   const tmpdata1 = command.split(":");
+  //console.log(tmpdata1);
   if (tmpdata1[0] == "DATA")convert64BaseStringToCoordinates(tmpdata1[1],false);
   else if (tmpdata1[0] == "NOTE")convert64BaseStringToNote(tmpdata1[1]);
   else if (tmpdata1[0] == "ERASE")convert64BaseStringToCoordinates(tmpdata1[1],true);
 }
 
 function connectWS() {
-  socket = new WebSocket("wss://n0p0.com/wss2/");
+  socket = new WebSocket("ws://localhost:10000");//"wss://n0p0.com/wss2/");
   // Connection opened
   socket.addEventListener("open", function (event) {
     document.getElementById("output").innerHTML += "<b>CONNECTED<b></b>\n</br>";
@@ -42,16 +74,15 @@ function connectWS() {
   socket.addEventListener("message", function (event) {
     const tmpdata = event.data.split(";");
    // console.log(tmpdata);
-    if (tmpdata[0] == "DATAID") currentTMPid = tmpdata[1];
-    else if (tmpdata[0] == "UUPDATE") {
-      drawingData.push([tmpdata[1],tmpdata[2]]);
+    if (tmpdata[0] == "DATAID") {
+      currentTMPid = tmpdata[1];
+    } else if (tmpdata[0] == "UUPDATE") {
+      addToDrawingData(tmpdata[1],tmpdata[2]);
       processDrawCommand(tmpdata[2]);
-    }
-    else if (tmpdata[0] == "DRAWINGSELECTED"){
+    } else if (tmpdata[0] == "DRAWINGSELECTED"){
       clearScreen();
       socket.send("SEND;DATA;");
-    }
-    else if (tmpdata[0] == "DRAWINGLIST"){
+    } else if (tmpdata[0] == "DRAWINGLIST"){
       let rows = tmpdata;
      // console.log(rows);
       document.getElementById("connectList").innerHTML =
@@ -71,8 +102,7 @@ function connectWS() {
             subrow[0] +
             ");'></td></tr>";
       });
-    }
-    else if (tmpdata[0] == "LOGINSUCCESS"){
+    } else if (tmpdata[0] == "LOGINSUCCESS"){
       document.getElementById("loggedinname").innerHTML = document.getElementById(
         "username"
       ).value;
@@ -81,15 +111,18 @@ function connectWS() {
     } else if (tmpdata[0] == "NEWNOTE"){
       createNote("note_"+tmpdata[1],tmpdata[2],tmpdata[3],"");
 
-    }else if (tmpdata[0] == "LOGOUTSUCCESS"){
+    } else if (tmpdata[0] == "LOGOUTSUCCESS"){
       document.getElementById("loggedinname").innerHTML = "";
       document.getElementById("needlogin").style.display = "";
       document.getElementById("loggedin").style.display = "none";
       clearScreen();
+    } else if (tmpdata[0] == "DOUNDO"){
+      remove1DrawingData(tmpdata[1])
+      forceRedraw();
     }
-
     
 
+    
 
 
     //console.log("Message from server ", event.data);
@@ -251,7 +284,7 @@ function selectDraw(id) {
   socket.send("SELECT;" + id + ";");
 }
 function doUndo() {
-  socket.send("UNDO;DRAWING;");
+  socket.send("UNDO;DATA;");
 }
 //async function selectDraw(id) {
 //  return await sendMessage(socket, "SELECT;" + id + ";", true);
@@ -370,7 +403,7 @@ async function windowAlmostLoad() {
       result1string = drawPrefix+b64str;
 
       sendDataInterval();
-
+      addToDrawingData(currentTMPid,result1string);
       //console.log(encodedData);
       resultString = "";
   });
