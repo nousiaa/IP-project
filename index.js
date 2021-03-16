@@ -27,6 +27,15 @@ function clearDrawingData() {
   drawingData = [[], []];
 }
 
+function showAndHideContent(contentToShow, contentToHide){
+  contentToShow.forEach(ee=>{
+    document.getElementById(ee).style.display="";
+  });
+  contentToHide.forEach(ee=>{
+    document.getElementById(ee).style.display="none";
+  });
+}
+
 function updateNote(noteid, notedata, x, y, sx, sy) {
   const nid = noteid.split("_");
   if (nid[1]) {
@@ -88,10 +97,26 @@ function connectWS() {
       case "DATAID":
         currentTMPid = tmpdata[1];
         break;
-
+      case "DRAWINGID":
+        selectDraw(tmpdata[1]);
+        break;
+        
       case "DRAWINGSELECTED":
+        showAndHideContent(["contentDiv"],["initialDiv","loadDiv"]);
         clearScreen();
         socket.send("SEND;DATA;");
+        break;
+
+      case "WAITJOIN":
+        showAndHideContent(["loadDiv"],["initialDiv","contentDiv"]);
+        break;
+
+      case "ALLOWJ":  
+        selectDraw(tmpdata[1]);
+        break;
+        
+      case "DISALLOWJ":  
+        showAndHideContent(["initialDiv"],["loadDiv","contentDiv"]);
         break;
 
       case "UUPDATE":
@@ -144,6 +169,7 @@ function connectWS() {
         document.getElementById("needlogin").style.display = "";
         document.getElementById("loggedin").style.display = "none";
         clearScreen();
+        showAndHideContent(["initialDiv"],["loadDiv","contentDiv"])
         break;
       case "ASKJOIN":
         if (confirm("Allow user " + tmpdata[2] + " to join this drawing?")) {

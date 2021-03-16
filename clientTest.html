@@ -44,19 +44,26 @@
             </div>
          </div>
          <div id="drawcontainer" style="float: left;">
-            <div id="drawcontrols">
-               <input type="button" id="notemode" value="NOTE" onClick="setNoteMode();">
-               <input type="button" id="drawmode" value="DRAW" onClick="setDrawMode();">
-               <input type="button" id="emode" value="ERASE" onClick="setEraseMode();">
-               <input type="button" id="undoB" value="UNDO" onClick="doUndo();">
-               <input type="file" id ="imageloader" />
-               <input type="button" id="exportImage" value ="EXPORT" onClick="exportImage();">
+            <div id="initialDiv">
+               
             </div>
-            <div id = "canvDIV" style="position: relative; width: 640px; height: 400px; resize: both; border: 2px solid; overflow: auto;padding: 5px;">
-               <canvas id="canvas" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
-               <canvas id="canvas1" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+            <div id="loadDiv" style="display: none;">
+               Please wait...
             </div>
-
+            <div id="contentDiv" style="display: none;">
+               <div id="drawcontrols">
+                  <input type="button" id="notemode" value="NOTE" onClick="setNoteMode();">
+                  <input type="button" id="drawmode" value="DRAW" onClick="setDrawMode();">
+                  <input type="button" id="emode" value="ERASE" onClick="setEraseMode();">
+                  <input type="button" id="undoB" value="UNDO" onClick="doUndo();">
+                  <input type="file" id ="imageloader" />
+                  <input type="button" id="exportImage" value ="EXPORT" onClick="exportImage();">
+               </div>
+               <div id = "canvDIV" style="position: relative; width: 640px; height: 400px; resize: both; border: 2px solid; overflow: auto;padding: 5px;">
+                  <canvas id="canvas" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 3;"></canvas>
+                  <canvas id="canvas1" width="640" height="400" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+               </div>
+            </div>
          </div>
 
 
