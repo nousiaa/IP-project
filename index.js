@@ -5,6 +5,14 @@ let socket = null;
 var active = false;
 var drawmode = 0;
 var drawingData = [[], []];
+var currentImage = "";
+
+function updateDrawingDataId (oldid, newid) {
+  const existID = drawingData[0].indexOf(oldid);
+  if (existID != -1) {
+    drawingData[0][existID] = newid;
+  }
+}
 
 function addToDrawingData(id, command) {
   //console.log(id,command);
@@ -79,8 +87,8 @@ function processDrawCommand(command) {
   if (tmpdata1[0] == "DATA")
     convert64BaseStringToCoordinates(tmpdata1[1], false);
   else if (tmpdata1[0] == "NOTE") convert64BaseStringToNote(tmpdata1[1]);
-  else if (tmpdata1[0] == "ERASE")
-    convert64BaseStringToCoordinates(tmpdata1[1], true);
+  else if (tmpdata1[0] == "ERASE") convert64BaseStringToCoordinates(tmpdata1[1], true);
+  else if (tmpdata1[0] == "IMG") draw64BaseImage(tmpdata1[1],tmpdata1[2],tmpdata1[3]+":"+tmpdata1[4].replace("*",";"));
 }
 
 function handleDeleteNote(button) {
@@ -111,13 +119,15 @@ function connectWS() {
     const tmpdata = event.data.split(";");
     // console.log(tmpdata);
     switch (tmpdata[0]) {
+      case "UPDATEID":
+        updateDrawingDataId(tmpdata[1],tmpdata[2])
+        break;
       case "DATAID":
         currentTMPid = tmpdata[1];
         break;
       case "DRAWINGID":
         selectDraw(tmpdata[1]);
         break;
-        
       case "DRAWINGSELECTED":
         showAndHideContent(["contentDiv"],["initialDiv","loadDiv"]);
         clearScreen();
@@ -207,19 +217,10 @@ function connectWS() {
 
 function uploadImage(e) {
   const reader = new FileReader();
-  let canvas = document.getElementById("canvas1");
-  let context = canvas.getContext("2d");
   reader.onload = (event) => {
-    const img = new Image();
-    img.onload = () => {
-      context.drawImage(img, 30, 30);
-    };
-    img.src = event.target.result;
+    currentImage=event.target.result
   };
-  let dataURL = reader.readAsDataURL(e.target.files[0]);
-  let prefix = "NEW;IMAGE;30:30:" + dataURL
-  let command = prefix + dataURL
-  //socket.send(command)
+  reader.readAsDataURL(e.target.files[0]);
 }
 
 function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
@@ -418,6 +419,15 @@ function setEraseMode() {
   drawmode = 2;
   document.getElementById("canvas").style.zIndex = 3;
 }
+
+const draw64BaseImage = (x,y,b64IMG) => {
+  let context1 = document.getElementById("canvas1").getContext("2d");
+  let image = new Image();
+  image.onload = function() {
+    context1.drawImage(image, x,y);
+  };
+  image.src = b64IMG;
+}
 const convert64BaseStringToNote = (str) => {
   const note = atob(str).split(":");
   //console.log(note);
@@ -492,11 +502,20 @@ function sendDataInterval() {
   }
 }
 
+function sendImage(x,y,image){
+  let tmpId = "IMG"+0;
+  let drawcom = "IMG:"+x+":"+y+":"+image.replace(";", '*');;
+  let command = "NEW;IMAGE;"+tmpId+";"+drawcom;
+  addToDrawingData(tmpId,drawcom);
+  socket.send(command)
+}
+
 async function windowAlmostLoad() {
   let canvasDIV = document.getElementById("canvDIV");
   let canvas = document.getElementById("canvas");
   let canvas1 = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
+  let context1 = canvas1.getContext("2d");
   let imageloader = document.getElementById("imageloader");
   imageloader.addEventListener("change", uploadImage);
   let resultString = "";
@@ -527,22 +546,33 @@ async function windowAlmostLoad() {
   });
 
   canvas.addEventListener("mousedown", function (event) {
-    socket.send("NEW;DATA;");
-    interVARl = setInterval(sendDataInterval, 200);
     setMouseCoordinates(event, "canvas");
-    isDrawing = true;
-    mouseXmin = mouseX;
-    mouseXmax = mouseX;
-    mouseYmin = mouseY;
-    mouseYmax = mouseY;
-    // Start Drawing
-    context.beginPath();
-    context.moveTo(mouseX, mouseY);
-    resultString +=
-      String.fromCharCode(mouseX & 255) +
-      String.fromCharCode((mouseX >> 8) & 255) +
-      String.fromCharCode(mouseY & 255) +
-      String.fromCharCode((mouseY >> 8) & 255);
+    if(currentImage !=""){
+      let image = new Image();
+      image.onload = function() {
+        context1.drawImage(image, mouseX,mouseY);
+      };
+      image.src = currentImage;
+      sendImage(mouseX,mouseY,currentImage);
+      currentImage ="";
+
+    } else {
+      socket.send("NEW;DATA;");
+      interVARl = setInterval(sendDataInterval, 200);
+      isDrawing = true;
+      mouseXmin = mouseX;
+      mouseXmax = mouseX;
+      mouseYmin = mouseY;
+      mouseYmax = mouseY;
+      // Start Drawing
+      context.beginPath();
+      context.moveTo(mouseX, mouseY);
+      resultString +=
+        String.fromCharCode(mouseX & 255) +
+        String.fromCharCode((mouseX >> 8) & 255) +
+        String.fromCharCode(mouseY & 255) +
+        String.fromCharCode((mouseY >> 8) & 255);
+    }
   });
 
   // Draw line to x,y when mouse is pressed down

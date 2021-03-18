@@ -149,8 +149,27 @@ class WSSocket implements MessageComponentInterface {
                     break;
                 }
 
+                if ($comm1[1]=="IMAGE") {
+                    if (empty($msgsock1[2]["drawing_id"])) {
+                        $msg = "SELECTDRAWINGERROR";
+                        $from->send($msg);
+                        break;
+                    }
+                    $query = $conn->prepare('INSERT INTO data (user_id, drawing_id,deleted,command) VALUES (?,?,0,?)');
+                    $query->execute([$msgsock1[2]["user_id"], $msgsock1[2]["drawing_id"],$comm1[3]]);
+                    $id = $conn->lastInsertId();
+                    $from->send("UPDATEID;".$comm1[2].";".$id.";");
+                    
 
-                if($comm1[1]=="DATA"){
+                    $msg = "UUPDATE;".$id.";".$comm1[3].";";
+                    foreach($clients as $client1){
+                        if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId){
+                            $client1[0]->send($msg);
+                        }
+
+                    }
+                    break;
+                } else if($comm1[1]=="DATA"){
                     if(empty($msgsock1[2]["drawing_id"])){
                         $msg = "SELECTDRAWINGERROR";
                         $from->send($msg);
