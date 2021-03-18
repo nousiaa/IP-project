@@ -83,6 +83,14 @@ function processDrawCommand(command) {
     convert64BaseStringToCoordinates(tmpdata1[1], true);
 }
 
+function deleteNote(noteID) {
+  const note = document.getElementById(noteID)
+  if(note) {
+    const div = note.parentElement
+    div.remove()
+  }
+}
+
 function connectWS() {
   socket = new WebSocket("wss://n0p0.com/wss2/"); //ws://localhost:10000");//"
   // Connection opened
@@ -117,6 +125,10 @@ function connectWS() {
         
       case "DISALLOWJ":  
         showAndHideContent(["initialDiv"],["loadDiv","contentDiv"]);
+        break;
+
+      case "DELETENOTE":
+        deleteNote("note_" + tmpdata[1])
         break;
 
       case "UUPDATE":
@@ -184,11 +196,11 @@ function connectWS() {
 }
 
 function uploadImage(e) {
-  let reader = new FileReader();
+  const reader = new FileReader();
   let canvas = document.getElementById("canvas1");
   let context = canvas.getContext("2d");
   reader.onload = (event) => {
-    let img = new Image();
+    const img = new Image();
     img.onload = () => {
       context.drawImage(img, 30, 30);
     };
