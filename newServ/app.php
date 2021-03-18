@@ -56,7 +56,7 @@ class WSSocket implements MessageComponentInterface {
 
         // handle the command
         switch ($comm1[0]){
-            case "DELETEDATA":
+            case "DELETENOTE":
                 if(empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])){
                     $msg = "AUTHERROR";
                     $from->send($msg);
@@ -66,7 +66,7 @@ class WSSocket implements MessageComponentInterface {
                 $query->execute([$msgsock1[2]["drawing_id"],$comm1[1]]);
                 $from->send("DELETEOK");
 
-                $msg = "DELETEDATA;".$comm1[1].";";
+                $msg = "DELETENOTE;".$comm1[1].";";
                 foreach($clients as $client1){
                     if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) $client1[0]->send($msg);
                 }
