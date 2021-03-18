@@ -87,6 +87,7 @@ function handleDeleteNote(button) {
   const id = button.parentElement.id
   const div = document.getElementById(id)
   div.remove();
+  const noteID =id.split("_")[1].slice(0,-3)
   socket.send("DELETENOTE;"+noteID+";")
 }
 
@@ -247,8 +248,8 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     div.appendChild(input)
 
     button.onclick= function (){handleDeleteNote(this)};
-    button.style = "float: right; height: 15%; width: 2%;"
-
+    button.style = "float: right; padding: 0; margin:0;"
+    button.innerHTML ="X"
     //div.addEventListener("mousedown", dragElement)
 
 
