@@ -83,7 +83,15 @@ function processDrawCommand(command) {
     convert64BaseStringToCoordinates(tmpdata1[1], true);
 }
 
-function deleteNote(noteID) {
+function handleDeleteNote(button) {
+  const id = button.parentElement.id
+  const div = document.getElementById(id)
+  div.remove();
+  socket.send("DELETENOTE;"+noteID+";")
+}
+
+
+function deleteNoteCallback(noteID) {
   const note = document.getElementById(noteID)
   if(note) {
     const div = note.parentElement
@@ -128,7 +136,8 @@ function connectWS() {
         break;
 
       case "DELETENOTE":
-        deleteNote("note_" + tmpdata[1])
+        deleteNoteCallback("note_" + tmpdata[1])
+        remove1DrawingData(tmpdata[1]);
         break;
 
       case "UUPDATE":
@@ -231,10 +240,14 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     existingnote.value = tvalue;
   } else {
     let div = document.createElement("div");
+    let button = document.createElement("button");
     let input = document.createElement("textarea");
 
-
+    div.appendChild(button)
     div.appendChild(input)
+
+    button.onclick= function (){handleDeleteNote(this)};
+    button.style = "float: right; height: 15%; width: 2%;"
 
     //div.addEventListener("mousedown", dragElement)
 
