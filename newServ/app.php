@@ -376,7 +376,7 @@ class WSSocket implements MessageComponentInterface {
                         $from->send($msg);
                         break;
                     }
-                    $query = $conn->prepare('SELECT * FROM drawing');
+                    $query = $conn->prepare('SELECT * FROM drawing where deleted=0');
                     $query->execute([]);
                     $rows = $query->fetchAll();
                     $msg = "DRAWINGLIST;";
