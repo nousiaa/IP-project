@@ -52,6 +52,7 @@
             </div>
             <div id="contentDiv" style="display: none;">
                <div id="drawcontrols">
+                  <input type="button" id="undoB" value="LEAVE DRAWING" onClick="if(confirm('Are you sure you want to leave this drawing'))leaveDrawing();">
                   <input type="button" id="notemode" value="NOTE" onClick="setNoteMode();">
                   <input type="button" id="drawmode" value="DRAW" onClick="setDrawMode();">
                   <input type="button" id="emode" value="ERASE" onClick="setEraseMode();">
