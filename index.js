@@ -122,7 +122,6 @@ function connectWS() {
       case "LEAVEDRAWING":
         showAndHideContent(["initialDiv"],["contentDiv","loadDiv"]);
         updateList();
-        dra
         break;
       case "UPDATEID":
         updateDrawingDataId(tmpdata[1],tmpdata[2])
