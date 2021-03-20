@@ -119,6 +119,11 @@ function connectWS() {
     const tmpdata = event.data.split(";");
     // console.log(tmpdata);
     switch (tmpdata[0]) {
+      case "LEAVEDRAWING":
+        showAndHideContent(["initialDiv"],["contentDiv","loadDiv"]);
+        updateList();
+        dra
+        break;
       case "UPDATEID":
         updateDrawingDataId(tmpdata[1],tmpdata[2])
         break;
@@ -485,6 +490,9 @@ function doUndo() {
 //  return await sendMessage(socket, "SELECT;" + id + ";", true);
 //}
 
+function leaveDrawing() {
+  socket.send("LEAVEDRAWING;");
+}
 function updateList() {
   socket.send("LIST;DRAWING;");
 }
