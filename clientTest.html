@@ -57,7 +57,12 @@
                   <input type="button" id="drawmode" value="DRAW" onClick="setDrawMode();">
                   <input type="button" id="emode" value="ERASE" onClick="setEraseMode();">
                   <input type="button" id="undoB" value="UNDO" onClick="doUndo();">
-                  <input type="file" id ="imageloader" />
+                  <button type="button">
+                     <label for="imageloader" style="">
+                        Add image
+                     </label>
+                  </button>
+                  <input type="file" id ="imageloader" style="display: none;"/>
                   <input type="button" id="exportImage" value ="EXPORT" onClick="exportImage();">
                </div>
                <div id = "canvDIV" style="position: relative; width: 640px; height: 400px; resize: both; border: 2px solid; overflow: auto;padding: 5px;">
