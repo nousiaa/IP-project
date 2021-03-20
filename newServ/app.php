@@ -56,6 +56,41 @@ class WSSocket implements MessageComponentInterface {
 
         // handle the command
         switch ($comm1[0]){
+            case "LEAVEDRAWING":
+                if(empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])){
+                    $msg = "AUTHERROR";
+                    $from->send($msg);
+                    break;
+                }
+                    
+                $query = $conn->prepare('SELECT * FROM drawing where id=?');
+                $query->execute([$msgsock1[2]["drawing_id"]]);
+                $row = $query->fetch();
+                
+
+                if($msgsock1[2]["user_id"] == $row["owner_id"]){
+                
+                    $query = $conn->prepare('UPDATE allowed_users SET deleted=1 where drawing_id=?');
+                    $query->execute([$msgsock1[2]["drawing_id"]]);
+                    $query = $conn->prepare('UPDATE drawing SET deleted=1 where id=?');
+                    $query->execute([$msgsock1[2]["drawing_id"]]);
+                    $did  =$msgsock1[2]["drawing_id"];
+                    $msg = "LEAVEDRAWING;";
+                    foreach($clients as &$client1){
+                        if($client1[2]["drawing_id"]==$did){
+                            $client1[2]["drawing_id"]=null;
+                            $client1[0]->send($msg);
+                        }
+                    }
+                    $msgsock1[2]["user_id"] = null;
+                } else {
+                    $query = $conn->prepare('UPDATE allowed_users SET deleted=1 where drawing_id=? AND user_id=?');
+                    $query->execute([$msgsock1[2]["drawing_id"],$msgsock1[2]["user_id"]]);
+                    $msgsock1[2]["user_id"] = null;
+                    $from->send("LEAVEDRAWING;");
+                }
+
+                break;
             case "DELETENOTE":
                 if(empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])){
                     $msg = "AUTHERROR";
