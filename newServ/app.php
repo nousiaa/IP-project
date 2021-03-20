@@ -82,11 +82,11 @@ class WSSocket implements MessageComponentInterface {
                             $client1[0]->send($msg);
                         }
                     }
-                    $msgsock1[2]["user_id"] = null;
+                    $msgsock1[2]["drawing_id"] = null;
                 } else {
                     $query = $conn->prepare('UPDATE allowed_users SET deleted=1 where drawing_id=? AND user_id=?');
                     $query->execute([$msgsock1[2]["drawing_id"],$msgsock1[2]["user_id"]]);
-                    $msgsock1[2]["user_id"] = null;
+                    $msgsock1[2]["drawing_id"] = null;
                     $from->send("LEAVEDRAWING;");
                 }
 
