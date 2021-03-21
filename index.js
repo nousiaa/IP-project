@@ -348,68 +348,6 @@ function draggable(element,noteinput) {
   }
 }
 
-/*
- *Waits for connection to be established, terminates if connection doesn't work after x number times.
- */
-const waitConnection = (socket) => {
-  return new Promise((resolve, reject) => {
-    const numberOfAttempts = 10;
-    const intervalTime = 1000;
-
-    let currentAttempt = 0;
-
-    const interval = setInterval(() => {
-      if (currentAttempt > numberOfAttempts - 1) {
-        clearInterval(interval);
-        reject(new Error("Maximum number of attempts"));
-      } else if (socket.readyState === socket.OPEN) {
-        clearInterval(interval);
-        resolve();
-      }
-      currentAttempt++;
-    }, intervalTime);
-  });
-};
-
-const sendMessage = async (socket, msg, callback) => {
-  //document.getElementById("output").innerHTML +=
-  //  "<b>" + msg + ":<b></b>\n</br>";
-  if (socket.readystate !== socket.OPEN) {
-    try {
-      await waitConnection(socket);
-      if (!!callback) {
-        socket.send(msg);
-        return receiveMessage(socket);
-      }
-      socket.send(msg);
-    } catch (err) {
-      console.error(err);
-    }
-  } else {
-    if (!!callback) {
-      socket.send(msg);
-      return receiveMessage(socket);
-    }
-    socket.send(msg);
-  }
-};
-
-//TODO: Add default behaviour, such as parsing message.
-const defaultMessageListener = (socket) => {
-  socket.onmessage = null;
-  socket.onmessage = (event) => { };
-};
-
-const receiveMessage = (socket) => {
-  const res = new Promise((resolve) => {
-    socket.onmessage = (event) => {
-      socket.onmessage = defaultMessageListener(socket);
-      resolve(event.data);
-    };
-  });
-
-  return res;
-};
 
 function setNoteMode() {
   drawmode = 1;
@@ -463,15 +401,6 @@ const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
   context.closePath();
 };
 
-async function doLogin() {
-  socket.send(
-    "LOGIN;" +
-    document.getElementById("username").value +
-    ";" +
-    document.getElementById("password").value +
-    ";"
-  );
-}
 
 function createNewDrawing() {
   const drawingName = prompt("Name for drawing", "") || "no name";
