@@ -162,7 +162,7 @@ class WSSocket implements MessageComponentInterface
                 $row = $query->fetch();
                 $token = "LOGINERROR";
                 if (password_verify($comm1[2], $row["password"])) {
-                    $token="LOGINSUCCESS;"+$row["id"].";";
+                    $token="LOGINSUCCESS;".$row["id"].";";
                     $msgsock1[2]["user_id"]=$row["id"];
                 }
                 $from->send($token);
