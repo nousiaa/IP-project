@@ -1,5 +1,5 @@
 <?php
-require dirname( __FILE__ ) . '/vendor/autoload.php';
+require dirname(__FILE__) . '/vendor/autoload.php';
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
@@ -10,8 +10,8 @@ use Ratchet\WebSocket\WsServer;
 
 $port = 10000;
 
-class WSSocket implements MessageComponentInterface {
-
+class WSSocket implements MessageComponentInterface
+{
     public function __construct()
     {
         $this->conn = null;
@@ -23,19 +23,20 @@ class WSSocket implements MessageComponentInterface {
             $this->conn = new PDO("mysql:host=".$dbconf["DBHOST"].";dbname=".$dbconf["DBNAME"], $dbconf["DBUSER"], $dbconf["DBPASS"]);
             //$this->conn = new PDO("sqlite:../draw.db");
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             die("ERROR");
         }
-
     }
 
-    public function onOpen(ConnectionInterface $conn1) {
+    public function onOpen(ConnectionInterface $conn1)
+    {
         // Store the new connection in clients
         $this->clients[$conn1->resourceId]=[$conn1,0,["user_id"=>null, "drawing_id"=>null]];
         echo "New connection! ({$conn1->resourceId})\n";
     }
 
-    public function onMessage(ConnectionInterface $from, $msg1) {
+    public function onMessage(ConnectionInterface $from, $msg1)
+    {
         $conn = $this->conn;
         $msgsock1 = &$this->clients[$from->resourceId];
         $clients = &$this->clients;
@@ -44,9 +45,9 @@ class WSSocket implements MessageComponentInterface {
         $comm1 = explode(";", $msg1);
 
         // handle the command
-        switch ($comm1[0]){
+        switch ($comm1[0]) {
             case "LEAVEDRAWING":
-                if(empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])){
+                if (empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
@@ -57,16 +58,15 @@ class WSSocket implements MessageComponentInterface {
                 $row = $query->fetch();
                 
 
-                if($msgsock1[2]["user_id"] == $row["owner_id"]){
-                
+                if ($msgsock1[2]["user_id"] == $row["owner_id"]) {
                     $query = $conn->prepare('UPDATE allowed_users SET deleted=1 where drawing_id=?');
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $query = $conn->prepare('UPDATE drawing SET deleted=1 where id=?');
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $did  =$msgsock1[2]["drawing_id"];
                     $msg = "LEAVEDRAWING;";
-                    foreach($clients as &$client1){
-                        if($client1[2]["drawing_id"]==$did){
+                    foreach ($clients as &$client1) {
+                        if ($client1[2]["drawing_id"]==$did) {
                             $client1[2]["drawing_id"]=null;
                             $client1[0]->send($msg);
                         }
@@ -81,7 +81,7 @@ class WSSocket implements MessageComponentInterface {
 
                 break;
             case "DELETENOTE":
-                if(empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])){
+                if (empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
@@ -91,12 +91,14 @@ class WSSocket implements MessageComponentInterface {
                 $from->send("DELETEOK");
 
                 $msg = "DELETENOTE;".$comm1[1].";";
-                foreach($clients as $client1){
-                    if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) $client1[0]->send($msg);
+                foreach ($clients as $client1) {
+                    if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
+                        $client1[0]->send($msg);
+                    }
                 }
                 break;
             case "DISALLOWJOIN":
-                if(empty($msgsock1[2]["user_id"])){
+                if (empty($msgsock1[2]["user_id"])) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
@@ -106,20 +108,20 @@ class WSSocket implements MessageComponentInterface {
                 $row = $query->fetch();
                 
 
-                if($msgsock1[2]["user_id"] != $row["owner_id"]){
+                if ($msgsock1[2]["user_id"] != $row["owner_id"]) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
                 }
-                foreach($clients as $client1){
-                    if($client1[2]["user_id"]==$comm1[1]){
+                foreach ($clients as $client1) {
+                    if ($client1[2]["user_id"]==$comm1[1]) {
                         $client1[0]->send("DISALLOWJ;".$msgsock1[2]["drawing_id"].";");
                     }
                 }
                 $from->send("OK");
                 break;
             case "ALLOWJOIN":
-                if(empty($msgsock1[2]["user_id"])){
+                if (empty($msgsock1[2]["user_id"])) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
@@ -129,7 +131,7 @@ class WSSocket implements MessageComponentInterface {
                 $row = $query->fetch();
                 
 
-                if($msgsock1[2]["user_id"] != $row["owner_id"]){
+                if ($msgsock1[2]["user_id"] != $row["owner_id"]) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
@@ -139,8 +141,8 @@ class WSSocket implements MessageComponentInterface {
                 $query = $conn->prepare('INSERT INTO allowed_users (drawing_id, user_id, deleted) VALUES (?,?,0)');
                 $query->execute([$msgsock1[2]["drawing_id"], $comm1[1]]);
 
-                foreach($clients as $client1){
-                    if($client1[2]["user_id"]==$comm1[1]){
+                foreach ($clients as $client1) {
+                    if ($client1[2]["user_id"]==$comm1[1]) {
                         $client1[0]->send("ALLOWJ;".$msgsock1[2]["drawing_id"].";");
                     }
                 }
@@ -159,15 +161,14 @@ class WSSocket implements MessageComponentInterface {
                 $query->execute([$comm1[1]]);
                 $row = $query->fetch();
                 $token = "LOGINERROR";
-                if(password_verify ($comm1[2], $row["password"])){
-
+                if (password_verify($comm1[2], $row["password"])) {
                     $token="LOGINSUCCESS";
                     $msgsock1[2]["user_id"]=$row["id"];
                 }
                 $from->send($token);
                 break;
             case "NEW":
-                if(empty($msgsock1[2]["user_id"])){
+                if (empty($msgsock1[2]["user_id"])) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
@@ -186,15 +187,14 @@ class WSSocket implements MessageComponentInterface {
                     
 
                     $msg = "UUPDATE;".$id.";".$comm1[3].";";
-                    foreach($clients as $client1){
-                        if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId){
+                    foreach ($clients as $client1) {
+                        if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId) {
                             $client1[0]->send($msg);
                         }
-
                     }
                     break;
-                } else if($comm1[1]=="DATA"){
-                    if(empty($msgsock1[2]["drawing_id"])){
+                } elseif ($comm1[1]=="DATA") {
+                    if (empty($msgsock1[2]["drawing_id"])) {
                         $msg = "SELECTDRAWINGERROR";
                         $from->send($msg);
                         break;
@@ -202,15 +202,14 @@ class WSSocket implements MessageComponentInterface {
                     $query = $conn->prepare('INSERT INTO data (user_id, drawing_id,deleted) VALUES (?,?,0)');
                     $query->execute([$msgsock1[2]["user_id"], $msgsock1[2]["drawing_id"]]);
                     $id = "DATAID;".$conn->lastInsertId();
-                } else if($comm1[1] == "DRAWING"){
+                } elseif ($comm1[1] == "DRAWING") {
                     $query = $conn->prepare('INSERT INTO drawing (owner_id,name,description,deleted) VALUES (?,?,?,0)');
                     $query->execute([$msgsock1[2]["user_id"], $comm1[2],$comm1[3]]);
                     $id = "DRAWINGID;".$conn->lastInsertId();
                     $query = $conn->prepare('INSERT INTO allowed_users (drawing_id, user_id, deleted) VALUES (?,?,0)');
                     $query->execute([$conn->lastInsertId(), $msgsock1[2]["user_id"]]);
-                    
-                } else if($comm1[1]=="NOTE"){
-                    if(empty($msgsock1[2]["drawing_id"])){
+                } elseif ($comm1[1]=="NOTE") {
+                    if (empty($msgsock1[2]["drawing_id"])) {
                         $msg = "SELECTDRAWINGERROR";
                         $from->send($msg);
                         break;
@@ -226,7 +225,7 @@ class WSSocket implements MessageComponentInterface {
 
 
             case "SELECT":
-                if(empty($msgsock1[2]["user_id"])){
+                if (empty($msgsock1[2]["user_id"])) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
@@ -236,7 +235,7 @@ class WSSocket implements MessageComponentInterface {
                 $row = $query->fetch();
 
                 // handle asking for join
-                if($row["count(*)"]==0){
+                if ($row["count(*)"]==0) {
                     $query = $conn->prepare('SELECT * FROM drawing where id=?');
                     $query->execute([$comm1[1]]);
                     $row = $query->fetch();
@@ -247,49 +246,46 @@ class WSSocket implements MessageComponentInterface {
     
                     $msg = "ASKJOIN;".$msgsock1[2]["user_id"].";".$row1["username"].";";
     
-                    foreach($clients as $client1){
-                        if($client1[2]["drawing_id"]==$comm1[1] && $client1[0]->resourceId!=$from->resourceId && $row["owner_id"]==$client1[2]["user_id"]){
+                    foreach ($clients as $client1) {
+                        if ($client1[2]["drawing_id"]==$comm1[1] && $client1[0]->resourceId!=$from->resourceId && $row["owner_id"]==$client1[2]["user_id"]) {
                             $client1[0]->send($msg);
                         }
                     }
                     $from->send("WAITJOIN");
                     break;
-
                 }
 
                 $msgsock1[2]["drawing_id"]=$comm1[1];
                 $from->send("DRAWINGSELECTED");
-                break;   
+                break;
             case "UPDATE":
-                if(empty($msgsock1[2]["user_id"])){
+                if (empty($msgsock1[2]["user_id"])) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
                 }
-                if($comm1[1]=="DATA"){
+                if ($comm1[1]=="DATA") {
                     
                     // missing exists check
                     $query = $conn->prepare('UPDATE data SET command=? WHERE user_id = ? AND id = ?');
                     $query->execute([$comm1[3], $msgsock1[2]["user_id"], $comm1[2]]);
 
                     $msg = "UUPDATE;".$comm1[2].";".$comm1[3].";";
-                    foreach($clients as $client1){
-                        if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId){
+                    foreach ($clients as $client1) {
+                        if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId) {
                             //var_dump($client1[2]); echo $msg;
                             $client1[0]->send($msg);
                         }
-
                     }
 
                     $msg = "OK";
-
-                } else{
+                } else {
                     $msg = "ERROR";
                 }
                 $from->send($msg);
                 break;
             case "UNDO":
-                if(empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))){
+                if (empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))) {
                     $from->send("AUTHERROR");
                     break;
                 }
@@ -302,8 +298,10 @@ class WSSocket implements MessageComponentInterface {
                     $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"]]);
 
                     $msg = "DOUNDO;".$row["max(id)"].";";
-                    foreach($clients as $client1){
-                        if($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"])$client1[0]->send($msg);
+                    foreach ($clients as $client1) {
+                        if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
+                            $client1[0]->send($msg);
+                        }
                     }
                     break;
                 } else {
@@ -312,7 +310,7 @@ class WSSocket implements MessageComponentInterface {
 
                 break;
             case "SEND":
-                if(empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))){
+                if (empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))) {
                     $from->send("AUTHERROR");
                     break;
                 }
@@ -331,14 +329,14 @@ class WSSocket implements MessageComponentInterface {
                 break;
 
             case "LIST":
-                if(empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))){
+                if (empty($msgsock1[2]["user_id"])|| ($comm1[1]=="DATA" &&empty($msgsock1[2]["drawing_id"]))) {
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
                 }
 
-                if($comm1[1]=="DRAWING"){
-                    if(empty($msgsock1[2]["user_id"])){
+                if ($comm1[1]=="DRAWING") {
+                    if (empty($msgsock1[2]["user_id"])) {
                         $msg = "AUTHERROR";
                         $from->send($msg);
                         break;
@@ -347,25 +345,27 @@ class WSSocket implements MessageComponentInterface {
                     $query->execute([]);
                     $rows = $query->fetchAll();
                     $msg = "DRAWINGLIST;";
-                    foreach($rows as $row){
+                    foreach ($rows as $row) {
                         $msg .= $row["id"].":".$row["name"].":".$row["description"].";";
                     }
                     
                     $from->send($msg);
-                    break;  
+                    break;
                 }
                 $msg = "ERROR";
                 $from->send($msg);
-                break; 
+                break;
 
         }
     }
 
-    public function onClose(ConnectionInterface $conn1) {
+    public function onClose(ConnectionInterface $conn1)
+    {
         unset($this->clients[$conn1->resourceId]);
     }
 
-    public function onError(ConnectionInterface $conn, \Exception $e) {
+    public function onError(ConnectionInterface $conn, \Exception $e)
+    {
     }
 }
 
