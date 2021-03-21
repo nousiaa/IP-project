@@ -611,12 +611,15 @@ async function windowAlmostLoad() {
       }
       result1string = drawPrefix + b64str;
     } else {
-      if(resizeCanvas()){
-        forceRedraw();
-      }
+      //if(resizeCanvas()){
+      //  forceRedraw();
+      //}
       
     }
   });
+
+
+
 
   // Stop drawing when mouse button is released
   canvas.addEventListener("mouseup", function (event) {
@@ -642,9 +645,13 @@ async function windowAlmostLoad() {
     currentTMPid = 0;
     resultString = "";
   });
-  //canvasDIV.addEventListener("mousemove", function (event) {
-
-  //});
+  canvasDIV.addEventListener("mousemove", function (event) {
+    if (!isDrawing) {
+      if(resizeCanvas()){
+        forceRedraw();
+      }
+    }
+  });
 
   function resizeCanvas() {
     let didResize=false;
