@@ -6,7 +6,7 @@ var active = false;
 var drawmode = 0;
 var drawingData = [[], []];
 var currentImage = "";
-
+var myuserid = null;
 function doLogin() {
   socket.send(
     "LOGIN;" +
@@ -182,8 +182,8 @@ function connectWS() {
         break;
 
       case "UUPDATE":
-        addToDrawingData(tmpdata[1], tmpdata[2]);
-        processDrawCommand(tmpdata[2]);
+        addToDrawingData(tmpdata[2], tmpdata[3]);
+        processDrawCommand(tmpdata[3]);
         break;
 
       case "DRAWINGLIST":
@@ -209,6 +209,7 @@ function connectWS() {
         break;
 
       case "LOGINSUCCESS":
+        myuserid = tmpdata[1];
         document.getElementById(
           "loggedinname"
         ).innerHTML = document.getElementById("username").value;
