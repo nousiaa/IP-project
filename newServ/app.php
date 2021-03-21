@@ -270,15 +270,18 @@ class WSSocket implements MessageComponentInterface
                     $query = $conn->prepare('UPDATE data SET command=? WHERE user_id = ? AND id = ?');
                     $query->execute([$comm1[3], $msgsock1[2]["user_id"], $comm1[2]]);
 
-                    $msg = "UUPDATE;".$msgsock1[2]["user_id"].";".$comm1[2].";".$comm1[3].";";
-                    foreach ($clients as $client1) {
-                        if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId) {
-                            //var_dump($client1[2]); echo $msg;
-                            $client1[0]->send($msg);
+                    if($query->rowCount()>0){
+                        $msg = "UUPDATE;".$msgsock1[2]["user_id"].";".$comm1[2].";".$comm1[3].";";
+                        foreach ($clients as $client1) {
+                            if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId) {
+                                //var_dump($client1[2]); echo $msg;
+                                $client1[0]->send($msg);
+                            }
                         }
+                        $msg = "OK";
+                    } else {
+                        $msg = "AUTHERROR";
                     }
-
-                    $msg = "OK";
                 } else {
                     $msg = "ERROR";
                 }
