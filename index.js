@@ -409,8 +409,13 @@ const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
   let startY = parseString.charCodeAt(2) + (parseString.charCodeAt(3) << 8);
   //console.log(startX);
   //console.log(startY);
-  if (eraseMode) context.globalCompositeOperation = "destination-out";
-  else context.globalCompositeOperation = "source-over";
+  if (eraseMode) {
+    context.lineWidth = 5;
+    context.globalCompositeOperation = "destination-out";
+  } else {
+    context.lineWidth = 1;
+    context.globalCompositeOperation = "source-over"
+  };
   context.beginPath();
   context.moveTo(startX, startY);
   for (i = 4; i < parseString.length; i += 4) {
@@ -479,7 +484,7 @@ async function windowAlmostLoad() {
   let context1 = canvas1.getContext("2d");
   let imageloader = document.getElementById("imageloader");
   imageloader.addEventListener("change", uploadImage);
-  imageloader.addEventListener("click", function(){setDrawMode();this.value=""});
+  imageloader.addEventListener("click", function(){canvasDIV.style.cursor="pointer";setDrawMode();this.value=""});
   let resultString = "";
   let mouseXmin = 0;
   let mouseYmin = 0;
@@ -517,7 +522,7 @@ async function windowAlmostLoad() {
       image.src = currentImage;
       sendImage(mouseX,mouseY,currentImage);
       currentImage ="";
-
+      canvasDIV.style.cursor="";
     } else {
       socket.send("NEW;DATA;");
       interVARl = setInterval(sendDataInterval, 200);
