@@ -7,6 +7,8 @@ var drawmode = 0;
 var drawingData = [[], []];
 var currentImage = "";
 var myuserid = null;
+var currentlyLinking = null
+
 function doLogin() {
   socket.send(
     "LOGIN;" +
@@ -24,14 +26,14 @@ function updateDrawingDataId (oldid, newid) {
   }
 }
 
-function addToDrawingData(id, command) {
+function addToDrawingData(id, command, userid=null) {
   //console.log(id,command);
   const existID = drawingData[0].indexOf(id);
   if (existID == -1) {
     drawingData[0].push(id);
-    drawingData[1].push(command);
+    drawingData[1].push([command,userid]);
   } else {
-    drawingData[1][existID] = command;
+    drawingData[1][existID] = [command,userid];
   }
 }
 function remove1DrawingData(id) {
@@ -68,7 +70,7 @@ function updateNote(noteid, notedata, x, y, sx, sy) {
 function forceRedraw() {
   clearScreen(true);
   drawingData[1].forEach((element) => {
-    processDrawCommand(element);
+    processDrawCommand(element[0],element[1]);
   });
 }
 
@@ -95,19 +97,20 @@ function clearScreen(retaindata = false) {
 
 var drawbuf = [];
 var drawint = null;
-function processDrawCommand(command) {
-  drawbuf.push(command);
+function processDrawCommand(command,userid) {
+  drawbuf.push([command,userid]);
   if(!drawint)drawint = setInterval(processDrawCommand1, 5);
 }
 
 function processDrawCommand1() {
   if(drawbuf.length>0){
-    command = drawbuf.shift();
-    const tmpdata1 = command.split(":");
+    let command = drawbuf.shift();
+
+    const tmpdata1 = command[0].split(":");
     //console.log(tmpdata1);
     if (tmpdata1[0] == "DATA")
       convert64BaseStringToCoordinates(tmpdata1[1], false);
-    else if (tmpdata1[0] == "NOTE") convert64BaseStringToNote(tmpdata1[1]);
+    else if (tmpdata1[0] == "NOTE") convert64BaseStringToNote(tmpdata1[1],command[1]);
     else if (tmpdata1[0] == "ERASE") convert64BaseStringToCoordinates(tmpdata1[1], true);
     else if (tmpdata1[0] == "IMG") draw64BaseImage(tmpdata1[1],tmpdata1[2],tmpdata1[3]+":"+tmpdata1[4].replace("*",";"));
   } else {
@@ -116,6 +119,45 @@ function processDrawCommand1() {
   }
 
 }
+function getImageDimensions(file) {
+  return new Promise (function (resolved, rejected) {
+    var i = new Image()
+    i.onload = function(){
+      resolved({w: i.width, h: i.height})
+    };
+    i.src = file
+  })
+}
+async function handleLinkNote(button,x,y) {
+  let count = 0;
+  let correctImg =null;
+  while(count<drawingData[1].length){
+    const thisitem = drawingData[1][count];
+    const tmpdata1 = thisitem[0].split(":");
+    if (tmpdata1[0] == "IMG"){
+      //console.log(tmpdata1[1],tmpdata1[2],x,y);
+      const imgxy = await getImageDimensions(tmpdata1[3]+":"+tmpdata1[4].replace("*",";"))
+      const imgX = 20;
+      const imgY = 20;
+      //console.log(tmpdata1[1]-0+imgxy.w,tmpdata1[2]-0+imgxy.h,imgxy);
+      if(tmpdata1[1]<x && tmpdata1[2]< y && (tmpdata1[1]-0+imgxy.w)>x && (tmpdata1[2]-0+imgxy.h)>y){
+        correctImg=count;
+      }
+
+    } 
+    count++;
+  }
+console.log(correctImg);
+  if(correctImg!=null){
+    const imgID = drawingData[0][correctImg];
+    const id = button.parentElement.id
+    const noteID =id.split("_")[1].slice(0,-3)
+    socket.send("LINKNOTE;"+noteID+";"+imgID+";")
+    //console.log(noteID,imgID)
+  }
+
+}
+
 
 function handleDeleteNote(button) {
   const id = button.parentElement.id
@@ -182,8 +224,8 @@ function connectWS() {
         break;
 
       case "UUPDATE":
-        addToDrawingData(tmpdata[2], tmpdata[3]);
-        processDrawCommand(tmpdata[3]);
+        addToDrawingData(tmpdata[2], tmpdata[3],tmpdata[1]);
+        processDrawCommand(tmpdata[3],tmpdata[1]);
         break;
 
       case "DRAWINGLIST":
@@ -253,7 +295,8 @@ function uploadImage(e) {
   reader.readAsDataURL(e.target.files[0]);
 }
 
-function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
+function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuserid) {
+  const mynote = myuserid==userid;
   const divID = noteID + "div"
   const existingDiv = document.getElementById(divID);
   const existingnote = document.getElementById(noteID);
@@ -273,14 +316,25 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
   } else {
     let div = document.createElement("div");
     let button = document.createElement("button");
+    let lbutton = document.createElement("button");
     let input = document.createElement("textarea");
-
+    let title=document.createElement("p");
+    title.innerHTML="Author: "+userid;
+    title.style = "float: left; padding: 0; margin:0;"
+    div.appendChild(title)
     div.appendChild(button)
+    if(mynote)div.appendChild(lbutton)
     div.appendChild(input)
 
     button.onclick= function (){handleDeleteNote(this)};
     button.style = "float: right; padding: 0; margin:0;"
     button.innerHTML ="X"
+
+    lbutton.onclick= function (){currentlyLinking=this};
+    lbutton.style = "float: right; padding: 0; margin:0;"
+    lbutton.innerHTML ="L"
+
+
     //div.addEventListener("mousedown", dragElement)
 
 
@@ -295,7 +349,8 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
 
     input.type = "text";
     input.id = noteID;
-    input.oninput = function () {
+    input.readOnly=!mynote;
+    if(mynote) input.oninput = function () {
       updateNote(
         this.id,
         this.value,
@@ -311,7 +366,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px") {
     input.style.top = 0;
     input.value = tvalue;
     input.classList.add("drawNote");
-    draggable(div,input);
+    if(mynote)draggable(div,input);
     //console.log(noteID);
 
     document.getElementById("canvDIV").appendChild(div);
@@ -396,10 +451,10 @@ const draw64BaseImage = (x,y,b64IMG) => {
   };
   image.src = b64IMG;
 }
-const convert64BaseStringToNote = (str) => {
+const convert64BaseStringToNote = (str,userid) => {
   const note = atob(str).split(":");
   //console.log(note);
-  createNote(note[0], note[1], note[2], note[5], note[3], note[4]);
+  createNote(note[0], note[1], note[2], note[5], note[3], note[4],userid);
 };
 
 const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
@@ -509,8 +564,13 @@ async function windowAlmostLoad() {
 
   canvas1.addEventListener("mousedown", function (event) {
     setMouseCoordinates(event, "canvas1");
+    if(currentlyLinking){
+      handleLinkNote(currentlyLinking,mouseX,mouseY)
+      currentlyLinking = null;
+    }else {
+      socket.send("NEW;NOTE;" + mouseX + "px;" + mouseY + "px;");
+    }
 
-    socket.send("NEW;NOTE;" + mouseX + "px;" + mouseY + "px;");
   });
 
   canvas.addEventListener("mousedown", function (event) {
