@@ -7,6 +7,16 @@ var drawmode = 0;
 var drawingData = [[], []];
 var currentImage = "";
 
+function doLogin() {
+  socket.send(
+    "LOGIN;" +
+    document.getElementById("username").value +
+    ";" +
+    document.getElementById("password").value +
+    ";"
+  );
+}
+
 function updateDrawingDataId (oldid, newid) {
   const existID = drawingData[0].indexOf(oldid);
   if (existID != -1) {
@@ -216,7 +226,6 @@ function connectWS() {
         break;
     }
   });
-  defaultMessageListener(socket);
 }
 
 function uploadImage(e) {
