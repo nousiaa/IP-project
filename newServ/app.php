@@ -162,7 +162,7 @@ class WSSocket implements MessageComponentInterface
                 $row = $query->fetch();
                 $token = "LOGINERROR";
                 if (password_verify($comm1[2], $row["password"])) {
-                    $token="LOGINSUCCESS";
+                    $token="LOGINSUCCESS;"+$row["id"].";";
                     $msgsock1[2]["user_id"]=$row["id"];
                 }
                 $from->send($token);
@@ -186,7 +186,7 @@ class WSSocket implements MessageComponentInterface
                     $from->send("UPDATEID;".$comm1[2].";".$id.";");
                     
 
-                    $msg = "UUPDATE;".$id.";".$comm1[3].";";
+                    $msg = "UUPDATE;".$msgsock1[2]["user_id"].";".$id.";".$comm1[3].";";
                     foreach ($clients as $client1) {
                         if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId) {
                             $client1[0]->send($msg);
@@ -270,7 +270,7 @@ class WSSocket implements MessageComponentInterface
                     $query = $conn->prepare('UPDATE data SET command=? WHERE user_id = ? AND id = ?');
                     $query->execute([$comm1[3], $msgsock1[2]["user_id"], $comm1[2]]);
 
-                    $msg = "UUPDATE;".$comm1[2].";".$comm1[3].";";
+                    $msg = "UUPDATE;".$msgsock1[2]["user_id"].";".$comm1[2].";".$comm1[3].";";
                     foreach ($clients as $client1) {
                         if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId) {
                             //var_dump($client1[2]); echo $msg;
@@ -320,7 +320,7 @@ class WSSocket implements MessageComponentInterface
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $rows = $query->fetchAll();
                     foreach ($rows as $row) {
-                        $from->send("UUPDATE;".$row["id"].";".$row["command"].";");
+                        $from->send("UUPDATE;".$row["user_id"].";".$row["id"].";".$row["command"].";");
                     }
                     break;
                 } else {
