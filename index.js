@@ -463,6 +463,7 @@ async function windowAlmostLoad() {
   let context1 = canvas1.getContext("2d");
   let imageloader = document.getElementById("imageloader");
   imageloader.addEventListener("change", uploadImage);
+  imageloader.addEventListener("click", function(){this.value=""});
   let resultString = "";
   let mouseXmin = 0;
   let mouseYmin = 0;
