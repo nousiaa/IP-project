@@ -11,7 +11,8 @@ CREATE TABLE data(
     user_id int,
     drawing_id int,
     command LONGTEXT,
-    deleted int
+    deleted int,
+    linked_to int
 );
 
 CREATE TABLE drawing(

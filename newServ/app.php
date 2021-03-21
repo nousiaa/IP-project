@@ -46,6 +46,18 @@ class WSSocket implements MessageComponentInterface
 
         // handle the command
         switch ($comm1[0]) {
+            case "LINKNOTE":
+                if (empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])) {
+                    $msg = "AUTHERROR";
+                    $from->send($msg);
+                    break;
+                }
+
+                $query = $conn->prepare('UPDATE data SET linked_to=? where drawing_id=? AND id=?');
+                $query->execute([$comm1[2],$msgsock1[2]["drawing_id"],$comm1[1]]);
+                $msgsock1[2]["drawing_id"] = null;
+                $from->send("LINKED;");
+                break;
             case "LEAVEDRAWING":
                 if (empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])) {
                     $msg = "AUTHERROR";
@@ -297,13 +309,20 @@ class WSSocket implements MessageComponentInterface
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $row = $query->fetch();
 
-                    $query = $conn->prepare('UPDATE data SET deleted=1 WHERE drawing_id = ? AND id = ?');
+                    $query = $conn->prepare('SELECT id from data WHERE drawing_id = ? AND linked_to=?');
                     $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"]]);
+                    $linkedrows = $query->fetchAll();
 
-                    $msg = "DOUNDO;".$row["max(id)"].";";
-                    foreach ($clients as $client1) {
-                        if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
-                            $client1[0]->send($msg);
+                    $query = $conn->prepare('UPDATE data SET deleted=1 WHERE drawing_id = ? AND (id = ? OR linked_to=?)');
+                    $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"],$row["max(id)"]]);
+                    $linkedrows[]=$row["max(id)"];
+                    var_dump( $linkedrows);die;
+                    foreach ($linkedrows as $lr){
+                        $msg = "DOUNDO;".$lr[""].";";
+                        foreach ($clients as $client1) {
+                            if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
+                                $client1[0]->send($msg);
+                            }
                         }
                     }
                     break;
