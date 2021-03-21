@@ -101,7 +101,6 @@ function processDrawCommand(command) {
 }
 
 function processDrawCommand1() {
-  //console.log(drawbuf.length);
   if(drawbuf.length>0){
     command = drawbuf.shift();
     const tmpdata1 = command.split(":");
@@ -480,7 +479,7 @@ async function windowAlmostLoad() {
   let context1 = canvas1.getContext("2d");
   let imageloader = document.getElementById("imageloader");
   imageloader.addEventListener("change", uploadImage);
-  imageloader.addEventListener("click", function(){this.value=""});
+  imageloader.addEventListener("click", function(){setDrawMode();this.value=""});
   let resultString = "";
   let mouseXmin = 0;
   let mouseYmin = 0;
