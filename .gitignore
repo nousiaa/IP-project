@@ -2,3 +2,4 @@ sqlite3.exe
 serv.bat
 /newServ/vendor
 draw.db
+/newServ/settings.php

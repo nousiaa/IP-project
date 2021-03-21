@@ -1,0 +1,9 @@
+<?php
+return [
+    'db'=>[
+        'DBNAME'=>'IPproject',
+        'DBUSER'=>'',
+        'DBPASS'=>'',
+        'DBHOST'=>'localhost',
+    ],
+];

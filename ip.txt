@@ -1,31 +1,35 @@
+DB - mysql
+
 data(id, user_id, drawing_id, command, deleted)
 drawing(id, name, description, allowed_users, deleted)
 user(id, username, password, deleted)
 
+CREATE DATABASE IPproject;
+
 CREATE TABLE data(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id int,
     drawing_id int,
-    command text,
+    command LONGTEXT,
     deleted int
 );
 
 CREATE TABLE drawing(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name text,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name LONGTEXT,
     owner_id int,
-    description text, 
-    allowed_users text, 
+    description LONGTEXT, 
+    allowed_users LONGTEXT, 
     deleted int
 );
 CREATE TABLE user(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username text NOT NULL,
-    password text NOT NULL, 
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    username LONGTEXT NOT NULL,
+    password LONGTEXT NOT NULL, 
     deleted int
 );
 CREATE TABLE allowed_users(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     drawing_id int,
     user_id int,
     deleted int
