@@ -91,14 +91,31 @@ function clearScreen(retaindata = false) {
   if (!retaindata) clearDrawingData();
 }
 
+
+
+var drawbuf = [];
+var drawint = null;
 function processDrawCommand(command) {
-  const tmpdata1 = command.split(":");
-  //console.log(tmpdata1);
-  if (tmpdata1[0] == "DATA")
-    convert64BaseStringToCoordinates(tmpdata1[1], false);
-  else if (tmpdata1[0] == "NOTE") convert64BaseStringToNote(tmpdata1[1]);
-  else if (tmpdata1[0] == "ERASE") convert64BaseStringToCoordinates(tmpdata1[1], true);
-  else if (tmpdata1[0] == "IMG") draw64BaseImage(tmpdata1[1],tmpdata1[2],tmpdata1[3]+":"+tmpdata1[4].replace("*",";"));
+  drawbuf.push(command);
+  if(!drawint)drawint = setInterval(processDrawCommand1, 5);
+}
+
+function processDrawCommand1() {
+  //console.log(drawbuf.length);
+  if(drawbuf.length>0){
+    command = drawbuf.shift();
+    const tmpdata1 = command.split(":");
+    //console.log(tmpdata1);
+    if (tmpdata1[0] == "DATA")
+      convert64BaseStringToCoordinates(tmpdata1[1], false);
+    else if (tmpdata1[0] == "NOTE") convert64BaseStringToNote(tmpdata1[1]);
+    else if (tmpdata1[0] == "ERASE") convert64BaseStringToCoordinates(tmpdata1[1], true);
+    else if (tmpdata1[0] == "IMG") draw64BaseImage(tmpdata1[1],tmpdata1[2],tmpdata1[3]+":"+tmpdata1[4].replace("*",";"));
+  } else {
+    clearInterval(drawint);
+    drawint=null;
+  }
+
 }
 
 function handleDeleteNote(button) {
@@ -584,7 +601,7 @@ async function windowAlmostLoad() {
     currentTMPid = 0;
     resultString = "";
   });
-  canvasDIV.addEventListener("mousemove", function (event) {
+  canvasDIV.addEventListener("mouseup", function (event) {
     if (!isDrawing) {
       if(resizeCanvas()){
         forceRedraw();
