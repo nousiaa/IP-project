@@ -22,11 +22,13 @@ class WSSocket implements MessageComponentInterface {
     public function __construct()
     {
         $this->conn = null;
-
+        $this->servconf=require("settings.php");
         $this->clients = [];
 
         try {
-            $this->conn = new PDO("sqlite:../draw.db");
+            $dbconf = $this->servconf["DB"];
+            $this->conn = new PDO("mysql:host=".$dbconf["DBHOST"].";dbname=".$dbconf["DBNAME"], $dbconf["DBUSER"], $dbconf["DBPASS"]);
+            //$this->conn = new PDO("sqlite:../draw.db");
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $e) {
             die("ERROR");
