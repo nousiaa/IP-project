@@ -1,9 +1,5 @@
 <?php
-
-
-
 require dirname( __FILE__ ) . '/vendor/autoload.php';
-
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
@@ -11,9 +7,6 @@ use Ratchet\ConnectionInterface;
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
-
-
-
 
 $port = 10000;
 
@@ -37,14 +30,8 @@ class WSSocket implements MessageComponentInterface {
     }
 
     public function onOpen(ConnectionInterface $conn1) {
-
         // Store the new connection in clients
-        
-
         $this->clients[$conn1->resourceId]=[$conn1,0,["user_id"=>null, "drawing_id"=>null]];
-
-
-
         echo "New connection! ({$conn1->resourceId})\n";
     }
 
@@ -239,16 +226,14 @@ class WSSocket implements MessageComponentInterface {
 
 
             case "SELECT":
-                $query = $conn->prepare('SELECT count(*) from allowed_users WHERE drawing_id=? AND user_id=? AND deleted<>1');
-                $query->execute([$comm1[1], $msgsock1[2]["user_id"]]);
-                $row = $query->fetch();
-
-
                 if(empty($msgsock1[2]["user_id"])){
                     $msg = "AUTHERROR";
                     $from->send($msg);
                     break;
                 }
+                $query = $conn->prepare('SELECT count(*) from allowed_users WHERE drawing_id=? AND user_id=? AND deleted<>1');
+                $query->execute([$comm1[1], $msgsock1[2]["user_id"]]);
+                $row = $query->fetch();
 
                 // handle asking for join
                 if($row["count(*)"]==0){
@@ -297,8 +282,6 @@ class WSSocket implements MessageComponentInterface {
                     }
 
                     $msg = "OK";
-
-                } else if($comm1[1] == "DRAWING"){
 
                 } else{
                     $msg = "ERROR";
@@ -354,25 +337,7 @@ class WSSocket implements MessageComponentInterface {
                     break;
                 }
 
-                if ($comm1[1]=="DATA") {
-                    if (isset($comm1[2]) && is_int($comm1[2])) {
-                        $query = $conn->prepare('SELECT * FROM data where drawing_id =? AND id>?');
-                        $query->execute([$msgsock1[2]["drawing_id"],$comm1[2]]);
-                        $rows = $query->fetchAll();
-                    } else {
-                        $query = $conn->prepare('SELECT * FROM data where drawing_id =?');
-                        $query->execute([$msgsock1[2]["drawing_id"]]);
-                        $rows = $query->fetchAll();
-                        var_dump($rows);
-                    }
-                    $getLastId = end($rows);
-                    $resultStr = $getLastId["id"].";";
-                    foreach ($rows as $row) {
-                        $resultStr.=$row["command"].";";
-                    }
-                    $from->send($resultStr);
-                    break;
-                } else if($comm1[1]=="DRAWING"){
+                if($comm1[1]=="DRAWING"){
                     if(empty($msgsock1[2]["user_id"])){
                         $msg = "AUTHERROR";
                         $from->send($msg);
