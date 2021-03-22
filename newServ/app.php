@@ -362,9 +362,9 @@ class WSSocket implements MessageComponentInterface
                         $query->execute([$msgsock1[2]["drawing_id"],$row1["linked_to"]]);
                         $row2 = $query->fetch();
 
-
-
-                        $msg = "UUPDATE;".$row2["linked_to"].";".$row2["user_id"].";".$row2["id"].";".$row2["command"].";";
+                        $linkID = $row2["linked_to"];
+                        if($linkID==null)$linkID="NULL";
+                        $msg = "UUPDATE;".$linkID.";".$row2["user_id"].";".$row2["id"].";".$row2["command"].";";
                         foreach ($clients as $client1) {
                             if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
                                 //var_dump($client1[2]); echo $msg;
