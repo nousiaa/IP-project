@@ -155,11 +155,7 @@ async function handleLinkNote(button,x,y) {
     const thisitem = drawingData[1][count];
     const tmpdata1 = thisitem[0].split(":");
     if (tmpdata1[0] == "IMG"){
-      //console.log(tmpdata1[1],tmpdata1[2],x,y);
       const imgxy = await getImageDimensions(tmpdata1[3]+":"+tmpdata1[4].replace("*",";"))
-      const imgX = 20;
-      const imgY = 20;
-      //console.log(tmpdata1[1]-0+imgxy.w,tmpdata1[2]-0+imgxy.h,imgxy);
       if(tmpdata1[1]<x && tmpdata1[2]< y && (tmpdata1[1]-0+imgxy.w)>x && (tmpdata1[2]-0+imgxy.h)>y){
         correctImg=count;
       }
@@ -167,15 +163,15 @@ async function handleLinkNote(button,x,y) {
     } 
     count++;
   }
-console.log(correctImg);
   if(correctImg!=null){
     const imgID = drawingData[0][correctImg];
-    const id = button.parentElement.id
-    const noteID =id.split("_")[1].slice(0,-3)
+    const id = button.parentElement.id;
+    const noteID =id.split("_")[1].slice(0,-3);
     updateLinkId(noteID,imgID);
-    socket.send("LINKNOTE;"+noteID+";"+imgID+";")
-    document.getElementById("note_"+noteID).oninput()
-    //console.log(noteID,imgID)
+    const existingTitle = document.getElementById("note_"+noteID + "_title");
+    existingTitle.innerHTML="Author: "+getUser(myuserid)+" LINKED";
+    socket.send("LINKNOTE;"+noteID+";"+imgID+";");
+    document.getElementById("note_"+noteID).oninput();
   }
 
 }
@@ -358,9 +354,10 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     title.innerHTML="Author: "+getUser(userid)+linkTEXT;
     title.id =noteID + "_title"
     title.style = "float: left; padding: 0; margin:0;"
-    div.appendChild(title)
+
     div.appendChild(button)
     if(mynote)div.appendChild(lbutton)
+    div.appendChild(title)
     div.appendChild(input)
 
     button.onclick= function (){handleDeleteNote(this)};
@@ -375,7 +372,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     //div.addEventListener("mousedown", dragElement)
 
 
-    div.style = "position: absolute; resize: both; z-index: 2; overflow: hidden; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7);"
+    div.style = "position: absolute; resize: both; z-index: 2; overflow: hidden; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7); min-width: 8em;"
     div.id = divID
     div.style.left = x;
     div.style.top = y;
