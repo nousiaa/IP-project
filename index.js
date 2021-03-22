@@ -8,6 +8,18 @@ var drawingData = [[], []];
 var currentImage = "";
 var myuserid = null;
 var currentlyLinking = null
+var userList = [[],[]];
+function getUser(id){
+  const existID = userList[0].indexOf(id);
+  if (existID != -1) {
+    return userList[1][existID];
+  } else {
+    socket.send("WHOIS;"+id+";");
+    return id;
+  }
+}
+
+
 
 function doLogin() {
   socket.send(
@@ -191,12 +203,15 @@ function connectWS() {
   // Connection opened
   socket.addEventListener("open", function (event) {
     document.getElementById("output").innerHTML += "<b>CONNECTED<b></b>\n</br>";
-    document.getElementById("connect").disabled = true;
   });
   socket.addEventListener("message", function (event) {
     const tmpdata = event.data.split(";");
     // console.log(tmpdata);
     switch (tmpdata[0]) {
+      case "USERIS":
+        userList[0].push(tmpdata[1])
+        userList[1].push(tmpdata[2])
+        break;
       case "LEAVEDRAWING":
         showAndHideContent(["initialDiv"],["contentDiv","loadDiv"]);
         updateList();
@@ -335,7 +350,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     let lbutton = document.createElement("button");
     let input = document.createElement("textarea");
     let title=document.createElement("p");
-    title.innerHTML="Author: "+userid+linkTEXT;
+    title.innerHTML="Author: "+getUser(userid)+linkTEXT;
     title.id =noteID + "_title"
     title.style = "float: left; padding: 0; margin:0;"
     div.appendChild(title)
