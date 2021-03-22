@@ -323,6 +323,14 @@ class WSSocket implements MessageComponentInterface
                             }
                         }
                     }
+
+                    $msg = "DOREDRAW;";
+                    foreach ($clients as $client1) {
+                        if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
+                            $client1[0]->send($msg);
+                        }
+                    }
+                    
                     break;
                 } else {
                     $from->send("ERROR");

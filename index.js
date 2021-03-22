@@ -266,9 +266,12 @@ function connectWS() {
 
       case "DOUNDO":
         remove1DrawingData(tmpdata[1]);
+        //forceRedraw();
+        break;
+      case "DOREDRAW":
+        //remove1DrawingData(tmpdata[1]);
         forceRedraw();
         break;
-
       case "LOGOUTSUCCESS":
         document.getElementById("loggedinname").innerHTML = "";
         document.getElementById("needlogin").style.display = "";
