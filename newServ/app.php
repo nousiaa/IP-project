@@ -60,6 +60,7 @@ class WSSocket implements MessageComponentInterface
                 foreach($rows as $row){
                     $msg .=$row["user_id"].":";
                 }
+                $msg=substr($msg, 0, -1);
                 $msg .= ";";
                 $from->send($msg);
 
