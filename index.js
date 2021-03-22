@@ -18,7 +18,13 @@ function doLogin() {
     ";"
   );
 }
-
+function updateLinkId (id,linkID) {
+  const existID = drawingData[0].indexOf(id);
+  //console.log(existID);
+  if (existID != -1) {
+    drawingData[1][existID][2] = linkID;
+  }
+}
 function updateDrawingDataId (oldid, newid) {
   const existID = drawingData[0].indexOf(oldid);
   if (existID != -1) {
@@ -26,14 +32,16 @@ function updateDrawingDataId (oldid, newid) {
   }
 }
 
-function addToDrawingData(id, command, userid=null) {
+function addToDrawingData(id, command, userid=null, linkedto1=null) {
+  let linkedto = linkedto1;
+  if(linkedto=="NULL")linkedto=null;
   //console.log(id,command);
   const existID = drawingData[0].indexOf(id);
   if (existID == -1) {
     drawingData[0].push(id);
-    drawingData[1].push([command,userid]);
+    drawingData[1].push([command,userid,linkedto]);
   } else {
-    drawingData[1][existID] = [command,userid];
+    drawingData[1][existID] = [command,userid,linkedto];
   }
 }
 function remove1DrawingData(id) {
@@ -70,7 +78,7 @@ function updateNote(noteid, notedata, x, y, sx, sy) {
 function forceRedraw() {
   clearScreen(true);
   drawingData[1].forEach((element) => {
-    processDrawCommand(element[0],element[1]);
+    processDrawCommand(element[0],element[1],element[2]);
   });
 }
 
@@ -97,8 +105,8 @@ function clearScreen(retaindata = false) {
 
 var drawbuf = [];
 var drawint = null;
-function processDrawCommand(command,userid) {
-  drawbuf.push([command,userid]);
+function processDrawCommand(command,userid,linkID) {
+  drawbuf.push([command,userid,linkID]);
   if(!drawint)drawint = setInterval(processDrawCommand1, 5);
 }
 
@@ -110,7 +118,7 @@ function processDrawCommand1() {
     //console.log(tmpdata1);
     if (tmpdata1[0] == "DATA")
       convert64BaseStringToCoordinates(tmpdata1[1], false);
-    else if (tmpdata1[0] == "NOTE") convert64BaseStringToNote(tmpdata1[1],command[1]);
+    else if (tmpdata1[0] == "NOTE") convert64BaseStringToNote(tmpdata1[1],command[1],command[2]);
     else if (tmpdata1[0] == "ERASE") convert64BaseStringToCoordinates(tmpdata1[1], true);
     else if (tmpdata1[0] == "IMG") draw64BaseImage(tmpdata1[1],tmpdata1[2],tmpdata1[3]+":"+tmpdata1[4].replace("*",";"));
   } else {
@@ -152,7 +160,9 @@ console.log(correctImg);
     const imgID = drawingData[0][correctImg];
     const id = button.parentElement.id
     const noteID =id.split("_")[1].slice(0,-3)
+    updateLinkId(noteID,imgID);
     socket.send("LINKNOTE;"+noteID+";"+imgID+";")
+    document.getElementById("note_"+noteID).oninput()
     //console.log(noteID,imgID)
   }
 
@@ -224,8 +234,8 @@ function connectWS() {
         break;
 
       case "UUPDATE":
-        addToDrawingData(tmpdata[3], tmpdata[4],tmpdata[2]);
-        processDrawCommand(tmpdata[4],tmpdata[2]);
+        addToDrawingData(tmpdata[3], tmpdata[4],tmpdata[2],tmpdata[1]);
+        processDrawCommand(tmpdata[4],tmpdata[2],tmpdata[1]=="NULL"?null:tmpdata[1]);
         break;
 
       case "DRAWINGLIST":
@@ -298,18 +308,21 @@ function uploadImage(e) {
   reader.readAsDataURL(e.target.files[0]);
 }
 
-function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuserid) {
+function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuserid, linkID=null) {
   const mynote = myuserid==userid;
   const divID = noteID + "div"
   const existingDiv = document.getElementById(divID);
+  const existingTitle = document.getElementById(noteID + "_title");
   const existingnote = document.getElementById(noteID);
-
+  let linkTEXT = "";
+  //console.log(linkID)
+  if(linkID!=null)linkTEXT=" LINKED" ;
   if (existingnote && existingDiv) {
     existingDiv.style.left = x;
     existingDiv.style.top = y;
     existingDiv.style.width = sx;
     existingDiv.style.height = sy;
-
+    existingTitle.innerHTML="Author: "+userid+linkTEXT;
 
     existingnote.style.left = 0;
     existingnote.style.top = 0;
@@ -322,7 +335,8 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     let lbutton = document.createElement("button");
     let input = document.createElement("textarea");
     let title=document.createElement("p");
-    title.innerHTML="Author: "+userid;
+    title.innerHTML="Author: "+userid+linkTEXT;
+    title.id =noteID + "_title"
     title.style = "float: left; padding: 0; margin:0;"
     div.appendChild(title)
     div.appendChild(button)
@@ -454,10 +468,10 @@ const draw64BaseImage = (x,y,b64IMG) => {
   };
   image.src = b64IMG;
 }
-const convert64BaseStringToNote = (str,userid) => {
+const convert64BaseStringToNote = (str,userid,linkID) => {
   const note = atob(str).split(":");
-  //console.log(note);
-  createNote(note[0], note[1], note[2], note[5], note[3], note[4],userid);
+  //console.log(linkID);
+  createNote(note[0], note[1], note[2], note[5], note[3], note[4],userid,linkID);
 };
 
 const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
