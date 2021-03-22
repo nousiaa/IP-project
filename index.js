@@ -375,7 +375,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     //div.addEventListener("mousedown", dragElement)
 
 
-    div.style = "position: absolute; resize: both; z-index: 2; overflow: hidden; background-color: rgba(255,255,204,0.1); min-width: 8em;"
+    div.style = "overflow: hidden; position: absolute; resize: both; z-index: 2; background-color: rgba(255,255,204,0.1); min-width: 8em;"
     div.id = divID
     div.style.left = x;
     div.style.top = y;
@@ -400,9 +400,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     };
     div.classList.add("drawNoteDiv");
     div.classList.add("drawNoteDivExtraStyle");
-    input.style = "word-wrap: break-word; display:block; position: relative; z-index: 2; width: 100%; height: 100%; border: none; resize: none; background-color: rgba(255,255,204,0.1);";
-    input.style.left = 0;
-    input.style.top = 0;
+    input.style = "overflow-y:auto;word-wrap: break-word; z-index: 2; width: 100%; height: 100%; background-color: rgba(255,255,204,0.1);";
     input.innerText = tvalue?tvalue:"";
     input.classList.add("drawNote");
     if(mynote)draggable(div,input);
