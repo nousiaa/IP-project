@@ -208,6 +208,11 @@ function connectWS() {
     const tmpdata = event.data.split(";");
     // console.log(tmpdata);
     switch (tmpdata[0]) {
+      case "USERIDS":
+        tmpdata[1].split(":").forEach(aa=>{
+          getUser(aa);
+        });
+        break;
       case "USERIS":
         userList[0].push(tmpdata[1])
         userList[1].push(tmpdata[2])
@@ -528,6 +533,7 @@ function createNewDrawing() {
 }
 function selectDraw(id) {
   socket.send("SELECT;" + id + ";");
+  socket.send("DRAWINGUSERS;");
 }
 function doUndo() {
   socket.send("UNDO;DATA;");
