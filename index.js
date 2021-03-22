@@ -331,7 +331,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
   const existingTitle = document.getElementById(noteID + "_title");
   const existingnote = document.getElementById(noteID);
   let linkTEXT = "";
-  //console.log(linkID)
+
   if(linkID!=null)linkTEXT=" LINKED" ;
   if (existingnote && existingDiv) {
     existingDiv.style.left = x;
@@ -344,12 +344,14 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     existingnote.style.top = 0;
     existingnote.style.width = sx;
     existingnote.style.height = sy;
-    existingnote.value = tvalue;
+    existingnote.innerText = tvalue?tvalue:"";
   } else {
     let div = document.createElement("div");
     let button = document.createElement("button");
     let lbutton = document.createElement("button");
-    let input = document.createElement("textarea");
+    let input = document.createElement("div");
+    let br = document.createElement("br");
+    
     let title=document.createElement("p");
     title.innerHTML="Author: "+getUser(userid)+linkTEXT;
     title.id =noteID + "_title"
@@ -358,6 +360,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     div.appendChild(button)
     if(mynote)div.appendChild(lbutton)
     div.appendChild(title)
+    div.appendChild(br)
     div.appendChild(input)
 
     button.onclick= function (){handleDeleteNote(this)};
@@ -372,7 +375,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     //div.addEventListener("mousedown", dragElement)
 
 
-    div.style = "position: absolute; resize: both; z-index: 2; overflow: hidden; background-color: rgba(255,255,204,0.1); box-shadow: 5px 5px 7px rgba(33,33,33,.7); min-width: 8em;"
+    div.style = "position: absolute; resize: both; z-index: 2; overflow: hidden; background-color: rgba(255,255,204,0.1); min-width: 8em;"
     div.id = divID
     div.style.left = x;
     div.style.top = y;
@@ -381,13 +384,14 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
 
 
 
-    input.type = "text";
+    //input.type = "text";
     input.id = noteID;
-    input.readOnly=!mynote;
+    input.contentEditable =mynote;
+    //input.readOnly=!mynote;
     if(mynote) input.oninput = function () {
       updateNote(
         this.id,
-        this.value,
+        this.innerText,
         div.style.left,
         div.style.top,
         div.style.width,
@@ -395,10 +399,11 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
       );
     };
     div.classList.add("drawNoteDiv");
-    input.style = "display:block; position: relative; z-index: 2; width: 100%; height: 100%; border: none; resize: none; background-color: rgba(255,255,204,0.1);";
+    div.classList.add("drawNoteDivExtraStyle");
+    input.style = "word-wrap: break-word; display:block; position: relative; z-index: 2; width: 100%; height: 100%; border: none; resize: none; background-color: rgba(255,255,204,0.1);";
     input.style.left = 0;
     input.style.top = 0;
-    input.value = tvalue;
+    input.innerText = tvalue?tvalue:"";
     input.classList.add("drawNote");
     if(mynote)draggable(div,input);
     //console.log(noteID);
@@ -439,7 +444,7 @@ function draggable(element,noteinput) {
 
     updateNote(
       noteinput.id,
-      noteinput.value,
+      noteinput.innerText,
       element.style.left,
       element.style.top,
       element.style.width,
@@ -738,12 +743,20 @@ async function windowAlmostLoad() {
 }
 
 function exportImage() {
+  
+  [].forEach.call(document.getElementsByClassName("drawNoteDiv"), function (aa) {
+    aa.classList.remove("drawNoteDivExtraStyle");
+  });
   html2canvas(document.querySelector("#canvDIV")).then(canvas => {
     const data = canvas.toDataURL();
+    //document.body.appendChild(canvas)
     const anchor = document.createElement("a");
     anchor.href = data;
     anchor.download = "export.png"
     anchor.target = "_blank";
     anchor.click();
+    [].forEach.call(document.getElementsByClassName("drawNoteDiv"), function (aa) {
+      aa.classList.add("drawNoteDivExtraStyle");
+    });
   })
 }
