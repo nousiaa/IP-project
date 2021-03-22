@@ -46,6 +46,25 @@ class WSSocket implements MessageComponentInterface
 
         // handle the command
         switch ($comm1[0]) {
+            case "DRAWINGUSERS":
+                if (empty($msgsock1[2]["user_id"])||empty($msgsock1[2]["drawing_id"])) {
+                    $msg = "AUTHERROR";
+                    $from->send($msg);
+                    break;
+                }
+
+                $query = $conn->prepare('SELECT user_id FROM allowed_users where drawing_id=?');
+                $query->execute([$msgsock1[2]["drawing_id"]]);
+                $rows = $query->fetchAll();
+                $msg = "USERIDS;";
+                foreach($rows as $row){
+                    $msg .=$row["user_id"].":";
+                }
+                $msg .= ";";
+                $from->send($msg);
+
+
+                break;
             case "WHOIS":
                 if (empty($msgsock1[2]["user_id"])) {
                     $msg = "AUTHERROR";
