@@ -130,6 +130,9 @@ class WSSocket implements MessageComponentInterface
                 }
                 $query = $conn->prepare('UPDATE data SET deleted=1 WHERE drawing_id = ? AND id = ?');
                 $query->execute([$msgsock1[2]["drawing_id"],$comm1[1]]);
+
+                $query = $conn->prepare('INSERT INTO data (user_id, drawing_id,deleted,command, linked_to) VALUES (?,?,0,?,?)');
+                $query->execute([$msgsock1[2]["user_id"], $msgsock1[2]["drawing_id"],"DELETED",$comm1[1]]);
                 $from->send("DELETEOK");
 
                 $msg = "DELETENOTE;".$comm1[1].";";
@@ -346,27 +349,55 @@ class WSSocket implements MessageComponentInterface
                     $query->execute([$msgsock1[2]["drawing_id"]]);
                     $row = $query->fetch();
 
-                    $query = $conn->prepare('SELECT id from data WHERE drawing_id = ? AND linked_to=?');
+                    $query = $conn->prepare('SELECT  command, linked_to  FROM data where drawing_id =? AND id=?');
                     $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"]]);
-                    $linkedrows = $query->fetchAll();
+                    $row1 = $query->fetch();
 
-                    $query = $conn->prepare('UPDATE data SET deleted=1 WHERE drawing_id = ? AND (id = ? OR linked_to=?)');
-                    $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"],$row["max(id)"]]);
-                    $linkedrows[]=["id"=>$row["max(id)"]];
-                    foreach ($linkedrows as $lr){
-                        $msg = "DOUNDO;".$lr["id"].";";
+                    if($row1["command"]=="DELETED"){
+                        $query = $conn->prepare('UPDATE data SET deleted=1 WHERE drawing_id = ? AND id = ?');
+                        $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"]]);
+                        $query = $conn->prepare('UPDATE data SET deleted=0 WHERE drawing_id = ? AND id = ?');
+                        $query->execute([$msgsock1[2]["drawing_id"],$row1["linked_to"]]);
+                        $query = $conn->prepare('SELECT * FROM data where drawing_id =? AND id=?');
+                        $query->execute([$msgsock1[2]["drawing_id"],$row1["linked_to"]]);
+                        $row2 = $query->fetch();
+
+
+
+                        $msg = "UUPDATE;".$row2["linked_to"].";".$row2["user_id"].";".$row2["id"].";".$row2["command"].";";
+                        foreach ($clients as $client1) {
+                            if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
+                                //var_dump($client1[2]); echo $msg;
+                                $client1[0]->send($msg);
+                            }
+                        }
+                        break;
+                    }else {
+                        $query = $conn->prepare('SELECT id from data WHERE drawing_id = ? AND linked_to=?');
+                        $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"]]);
+                        $linkedrows = $query->fetchAll();
+    
+                        $query = $conn->prepare('UPDATE data SET deleted=1 WHERE drawing_id = ? AND (id = ? OR linked_to=?)');
+                        $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"],$row["max(id)"]]);
+                        $linkedrows[]=["id"=>$row["max(id)"]];
+    
+                        
+                        foreach ($linkedrows as $lr){
+                            $msg = "DOUNDO;".$lr["id"].";";
+                            foreach ($clients as $client1) {
+                                if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
+                                    $client1[0]->send($msg);
+                                }
+                            }
+                        }
+    
+                        $msg = "DOREDRAW;";
                         foreach ($clients as $client1) {
                             if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
                                 $client1[0]->send($msg);
                             }
                         }
-                    }
-
-                    $msg = "DOREDRAW;";
-                    foreach ($clients as $client1) {
-                        if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
-                            $client1[0]->send($msg);
-                        }
+                        break;
                     }
                     
                     break;
@@ -388,7 +419,7 @@ class WSSocket implements MessageComponentInterface
                     foreach ($rows as $row) {
                         $ltoID =$row["linked_to"];
                         if($ltoID==null)$ltoID = "NULL";
-                        $from->send("UUPDATE;".$ltoID.";".$row["user_id"].";".$row["id"].";".$row["command"].";");
+                        if($row["command"]!="DELETED") $from->send("UUPDATE;".$ltoID.";".$row["user_id"].";".$row["id"].";".$row["command"].";");
                     }
                     break;
                 } else {
