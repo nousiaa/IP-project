@@ -338,7 +338,7 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     existingDiv.style.top = y;
     existingDiv.style.width = sx;
     existingDiv.style.height = sy;
-    existingTitle.innerHTML="Author: "+userid+linkTEXT;
+    existingTitle.innerHTML="Author: "+getUser(userid)+linkTEXT;
 
     existingnote.style.left = 0;
     existingnote.style.top = 0;
