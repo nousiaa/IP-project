@@ -356,7 +356,7 @@ class WSSocket implements MessageComponentInterface
                     $rows = $query->fetchAll();
                     foreach ($rows as $row) {
                         $ltoID =$row["linked_to"];
-                        if($ltoID)$ltoID = "NULL";
+                        if($ltoID==null)$ltoID = "NULL";
                         $from->send("UUPDATE;".$ltoID.";".$row["user_id"].";".$row["id"].";".$row["command"].";");
                     }
                     break;
