@@ -224,8 +224,8 @@ function connectWS() {
         break;
 
       case "UUPDATE":
-        addToDrawingData(tmpdata[2], tmpdata[3],tmpdata[1]);
-        processDrawCommand(tmpdata[3],tmpdata[1]);
+        addToDrawingData(tmpdata[3], tmpdata[4],tmpdata[2]);
+        processDrawCommand(tmpdata[4],tmpdata[2]);
         break;
 
       case "DRAWINGLIST":
