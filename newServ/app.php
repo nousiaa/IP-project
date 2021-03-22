@@ -55,7 +55,6 @@ class WSSocket implements MessageComponentInterface
 
                 $query = $conn->prepare('UPDATE data SET linked_to=? where drawing_id=? AND id=?');
                 $query->execute([$comm1[2],$msgsock1[2]["drawing_id"],$comm1[1]]);
-                $msgsock1[2]["drawing_id"] = null;
                 $from->send("LINKED;");
                 break;
             case "LEAVEDRAWING":
@@ -315,10 +314,9 @@ class WSSocket implements MessageComponentInterface
 
                     $query = $conn->prepare('UPDATE data SET deleted=1 WHERE drawing_id = ? AND (id = ? OR linked_to=?)');
                     $query->execute([$msgsock1[2]["drawing_id"],$row["max(id)"],$row["max(id)"]]);
-                    $linkedrows[]=$row["max(id)"];
-                    var_dump( $linkedrows);die;
+                    $linkedrows[]=["id"=>$row["max(id)"]];
                     foreach ($linkedrows as $lr){
-                        $msg = "DOUNDO;".$lr[""].";";
+                        $msg = "DOUNDO;".$lr["id"].";";
                         foreach ($clients as $client1) {
                             if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
                                 $client1[0]->send($msg);
