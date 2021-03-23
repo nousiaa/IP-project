@@ -1,8 +1,4 @@
-DB - mysql
-
-data(id, user_id, drawing_id, command, deleted)
-drawing(id, name, description, allowed_users, deleted)
-user(id, username, password, deleted)
+#DB - mysql
 
 CREATE DATABASE IPproject;
 
@@ -36,10 +32,5 @@ CREATE TABLE allowed_users(
     deleted int
 );
 
-//test,test
+#test,test
 INSERT INTO user (username, password, deleted ) VALUES ("test","$2y$10$x89D0NaocUnJNcPAuL1vb.RZZAg1xRAC43hKQsUZ2lsdV/.XbJ7Yu",0);
-
-
-LOGIN;username;password
-NEW;<token>;DRAWING;<name>;<description>;
-NEW;<token>;DATA;<drawing_id>;
