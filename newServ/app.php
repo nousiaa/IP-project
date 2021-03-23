@@ -21,7 +21,6 @@ class WSSocket implements MessageComponentInterface
         try {
             $dbconf = $this->servconf["DB"];
             $this->conn = new PDO("mysql:host=".$dbconf["DBHOST"].";dbname=".$dbconf["DBNAME"], $dbconf["DBUSER"], $dbconf["DBPASS"]);
-            //$this->conn = new PDO("sqlite:../draw.db");
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             die("ERROR");
@@ -326,7 +325,6 @@ class WSSocket implements MessageComponentInterface
                         $msg = "UUPDATE;".$ltoID.";".$msgsock1[2]["user_id"].";".$comm1[2].";".$comm1[3].";";
                         foreach ($clients as $client1) {
                             if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"] && $client1[0]->resourceId!=$from->resourceId) {
-                                //var_dump($client1[2]); echo $msg;
                                 $client1[0]->send($msg);
                             }
                         }
@@ -367,7 +365,6 @@ class WSSocket implements MessageComponentInterface
                         $msg = "UUPDATE;".$linkID.";".$row2["user_id"].";".$row2["id"].";".$row2["command"].";";
                         foreach ($clients as $client1) {
                             if ($client1[2]["drawing_id"]==$msgsock1[2]["drawing_id"]) {
-                                //var_dump($client1[2]); echo $msg;
                                 $client1[0]->send($msg);
                             }
                         }

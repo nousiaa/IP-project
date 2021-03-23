@@ -1,4 +1,3 @@
-let data = "test;"; //"LOGIN;test;test"
 var result1string = "";
 var currentTMPid = 0;
 let socket = null;
@@ -32,7 +31,6 @@ function doLogin() {
 }
 function updateLinkId (id,linkID) {
   const existID = drawingData[0].indexOf(id);
-  //console.log(existID);
   if (existID != -1) {
     drawingData[1][existID][2] = linkID;
   }
@@ -47,7 +45,6 @@ function updateDrawingDataId (oldid, newid) {
 function addToDrawingData(id, command, userid=null, linkedto1=null) {
   let linkedto = linkedto1;
   if(linkedto=="NULL")linkedto=null;
-  //console.log(id,command);
   const existID = drawingData[0].indexOf(id);
   if (existID == -1) {
     drawingData[0].push(id);
@@ -127,7 +124,6 @@ function processDrawCommand1() {
     let command = drawbuf.shift();
 
     const tmpdata1 = command[0].split(":");
-    //console.log(tmpdata1);
     if (tmpdata1[0] == "DATA")
       convert64BaseStringToCoordinates(tmpdata1[1], false);
     else if (tmpdata1[0] == "NOTE") convert64BaseStringToNote(tmpdata1[1],command[1],command[2]);
@@ -202,7 +198,7 @@ function connectWS() {
   });
   socket.addEventListener("message", function (event) {
     const tmpdata = event.data.split(";");
-    // console.log(tmpdata);
+
     switch (tmpdata[0]) {
       case "USERIDS":
         tmpdata[1].split(":").forEach(aa=>{
@@ -256,12 +252,10 @@ function connectWS() {
 
       case "DRAWINGLIST":
         let rows = tmpdata;
-        // console.log(rows);
         document.getElementById("connectList").innerHTML =
           "<tr><th>Name</th><th>Description</th><th>Connect</th></tr>";
         rows.forEach((x) => {
           var subrow = x.split(":");
-          //  console.log(subrow);
           if (subrow[0] && subrow[0] != "DRAWINGLIST")
             document.getElementById("connectList").innerHTML +=
               "<tr><td>" +
@@ -292,10 +286,8 @@ function connectWS() {
 
       case "DOUNDO":
         remove1DrawingData(tmpdata[1]);
-        //forceRedraw();
         break;
       case "DOREDRAW":
-        //remove1DrawingData(tmpdata[1]);
         forceRedraw();
         break;
       case "LOGOUTSUCCESS":
@@ -371,10 +363,6 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     lbutton.style = "float: right; padding: 0; margin:0;"
     lbutton.innerHTML ="L"
 
-
-    //div.addEventListener("mousedown", dragElement)
-
-
     div.style = "overflow: hidden; position: absolute; resize: both; z-index: 2; background-color: rgba(255,255,204,0.1); min-width: 8em;"
     div.id = divID
     div.style.left = x;
@@ -382,12 +370,9 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     div.style.width = sx;
     div.style.height = sy;
 
-
-
-    //input.type = "text";
     input.id = noteID;
     input.contentEditable =mynote;
-    //input.readOnly=!mynote;
+
     if(mynote) input.oninput = function () {
       updateNote(
         this.id,
@@ -404,7 +389,6 @@ function createNote(noteID, x, y, tvalue, sx = "60px", sy = "40px", userid=myuse
     input.innerText = tvalue?tvalue:"";
     input.classList.add("drawNote");
     if(mynote)draggable(div,input);
-    //console.log(noteID);
 
     document.getElementById("canvDIV").appendChild(div);
   }
@@ -490,7 +474,6 @@ const draw64BaseImage = (x,y,b64IMG) => {
 }
 const convert64BaseStringToNote = (str,userid,linkID) => {
   const note = atob(str).split(":");
-  //console.log(linkID);
   createNote(note[0], note[1], note[2], note[5], note[3], note[4],userid,linkID);
 };
 
@@ -500,8 +483,7 @@ const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
   let context = canvas.getContext("2d");
   let startX = parseString.charCodeAt(0) + (parseString.charCodeAt(1) << 8);
   let startY = parseString.charCodeAt(2) + (parseString.charCodeAt(3) << 8);
-  //console.log(startX);
-  //console.log(startY);
+
   if (eraseMode) {
     context.lineWidth = 5;
     context.globalCompositeOperation = "destination-out";
@@ -516,8 +498,6 @@ const convert64BaseStringToCoordinates = (str, eraseMode = false) => {
       parseString.charCodeAt(i) + (parseString.charCodeAt(i + 1) << 8);
     let mouseY =
       parseString.charCodeAt(i + 2) + (parseString.charCodeAt(i + 3) << 8);
-    //console.log(mouseX);
-    //console.log(mouseY);
     context.lineTo(mouseX, mouseY);
     context.stroke();
   }
@@ -538,9 +518,6 @@ function selectDraw(id) {
 function doUndo() {
   socket.send("UNDO;DATA;");
 }
-//async function selectDraw(id) {
-//  return await sendMessage(socket, "SELECT;" + id + ";", true);
-//}
 
 function leaveDrawing() {
   socket.send("LEAVEDRAWING;");
@@ -556,7 +533,6 @@ window.onload = () => {
 };
 
 function sendDataInterval() {
-  //console.log("UPDATE;DATA;" + currentTMPid + ";" + result1string);
   if (currentTMPid) {
     socket.send("UPDATE;DATA;" + currentTMPid + ";" + result1string);
   }
@@ -594,10 +570,6 @@ async function windowAlmostLoad() {
   let isDrawing = false;
 
   connectWS();
-  //console.log(await sendMessage(socket,"LOGIN;test;test;", true));
-  //console.log(await sendMessage(socket,"SELECT;8;", true));
-
-  //sendMessage(socket,"LOGIN;test;test;");
   //Start drawing when mouse is clicked down
 
   canvas1.addEventListener("mousedown", function (event) {
@@ -669,12 +641,7 @@ async function windowAlmostLoad() {
         convert64BaseStringToCoordinates(b64str, false);
       }
       result1string = drawPrefix + b64str;
-    } else {
-      //if(resizeCanvas()){
-      //  forceRedraw();
-      //}
-      
-    }
+    } 
   });
 
 
@@ -686,7 +653,6 @@ async function windowAlmostLoad() {
     clearInterval(interVARl);
     isDrawing = false;
 
-    //console.log(mouseXmin, mouseYmin, mouseXmax, mouseYmax);
     drawPrefix = "DATA:";
     let b64str = window.btoa(resultString);
     if (drawmode == 2) {
@@ -700,7 +666,6 @@ async function windowAlmostLoad() {
 
     sendDataInterval();
     addToDrawingData(currentTMPid, result1string);
-    //console.log(encodedData);
     currentTMPid = 0;
     resultString = "";
   });
@@ -716,7 +681,6 @@ async function windowAlmostLoad() {
     let didResize=false;
     const divx = canvasDIV.style.width.split("px")[0];
     const divy = canvasDIV.style.height.split("px")[0];
-    //console.log(divx);
     if (canvas.width != divx) {
       canvas.width = divx;
       canvas1.width = divx;
@@ -747,7 +711,6 @@ function exportImage() {
   });
   html2canvas(document.querySelector("#canvDIV")).then(canvas => {
     const data = canvas.toDataURL();
-    //document.body.appendChild(canvas)
     const anchor = document.createElement("a");
     anchor.href = data;
     anchor.download = "export.png"
