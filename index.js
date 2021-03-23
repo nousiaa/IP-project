@@ -44,13 +44,16 @@ function updateDrawingDataId (oldid, newid) {
 
 function addToDrawingData(id, command, userid=null, linkedto1=null) {
   let linkedto = linkedto1;
+  let uid = userid;
   if(linkedto=="NULL")linkedto=null;
   const existID = drawingData[0].indexOf(id);
   if (existID == -1) {
     drawingData[0].push(id);
-    drawingData[1].push([command,userid,linkedto]);
+    drawingData[1].push([command,uid,linkedto]);
   } else {
-    drawingData[1][existID] = [command,userid,linkedto];
+    if(!uid)uid = drawingData[1][existID][1];
+    if(!linkedto)linkedto = drawingData[1][existID][2];
+    drawingData[1][existID] = [command,uid,linkedto];
   }
 }
 function remove1DrawingData(id) {
@@ -282,6 +285,7 @@ function connectWS() {
 
       case "NEWNOTE":
         createNote("note_" + tmpdata[1], tmpdata[2], tmpdata[3], "");
+        addToDrawingData(tmpdata[1], "", myuserid, null);
         break;
 
       case "DOUNDO":
@@ -542,7 +546,7 @@ function sendImage(x,y,image){
   let tmpId = "IMG"+0;
   let drawcom = "IMG:"+x+":"+y+":"+image.replace(";", '*');;
   let command = "NEW;IMAGE;"+tmpId+";"+drawcom;
-  addToDrawingData(tmpId,drawcom);
+  addToDrawingData(tmpId,drawcom,myuserid);
   socket.send(command)
 }
 
@@ -665,7 +669,7 @@ async function windowAlmostLoad() {
     result1string = drawPrefix + b64str;
 
     sendDataInterval();
-    addToDrawingData(currentTMPid, result1string);
+    addToDrawingData(currentTMPid, result1string, myuserid);
     currentTMPid = 0;
     resultString = "";
   });
